@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  supabaseAuthId String @unique
+  phone String @unique
+  name String
+  email String
+  city String
+  state String
+  gender String
+  dob String
+  profileCreatedBy String
+  adminVerificationStatus Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  personalDetails PersonalDetails?
+  partnerPrefrences PartnerPreferences?
+  relegiousDetails ReligiousDetails?
+  images Images?
+
+  shortlistedUsers       String[] @default([]) @db.ObjectId
+  matchedUsers           String[] @default([]) @db.ObjectId
+  blockedUsers           String[] @default([]) @db.ObjectId
+  profileViews           String[] @default([]) @db.ObjectId
+  shortlistedBy           String[] @default([]) @db.ObjectId
+  
+  // Index on userId for faster searches
+}
+
+model PersonalDetails {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+
+  aboutMe String
+  height String
+  maritalStatus String
+  children String
+  childrenLiving String
+  moreKids String
+  ethnicBackground String
+  occupation String
+  hobbies String
+  education String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+    // Index on userId for faster searches
+}
+
+model PartnerPreferences {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+
+  gender String
+  ageGroupFrom String
+  ageGroupTo String
+  state String
+  maritalStatus String
+  religiousPreference String
+  ethnicityPreference String
+  educationLevel String
+  work String
+  considerSomeoneHavingChildren String
+
+  hijab String?
+  smoke String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+   // Index on userId for faster searches
+}
+
+model ReligiousDetails {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+
+  religiosity String
+  prayer String
+  revert String
+  revertDuration String?
+  mosqueVisit String
+  smoke String?
+  hijab String?
+  considerWearingHijab String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+    // Index on userId for faster searches
+}
+
+model Images{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+
+  profilePhoto String
+  selfiePhoto String
+  photos String[] @default([])
+  adminVerificationStatus Boolean @default(false)
+}
+
