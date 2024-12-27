@@ -45,18 +45,20 @@
   background-color: rgba(4, 30, 66, 1);
   color: white;
   width: 300px;
-  padding: 10 10;
+  padding: 10px !important;
   border-radius: 50px;
   cursor: pointer;
+  height : 50px;
 }
 
 .red-button{
   background-color: #BF0D3E ;
   color: white;
   width: 300px;
-  padding: 10 10;
+  padding: 10px !important;
   border-radius: 50px;
   cursor: pointer;
+  height : 50px;
 }
 
 .blue-button:hover{
@@ -71,9 +73,10 @@
   background-color: white;
   color: #BF0D3E;
   width: 300px;
-  padding: 10 10;
+  padding: 10px !important;
   border-radius: 50px;
   cursor: pointer;
+  height: 50px;
 }
 
 input:focus {
@@ -85,16 +88,18 @@ input:focus {
 
 .input{
   width: 300px;
-  padding: 10 10;
+  padding: 10px !important;
   border: 1px solid #C4C4C4;
   border-radius: 10px;
+  height: 50px;
 }
 
 .input-black{
   width: 300px;
-  padding: 10 10;
+  padding: 10px !important;
   border: 1px solid black;
   border-radius: 10px;
+  height: 50px;
 }
 
 /* globals.css */

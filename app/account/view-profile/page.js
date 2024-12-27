@@ -163,35 +163,35 @@ const ViewProfilePage = () => {
 
                 {personalDetailsChevron && (
                     <div className='mt-5' >
-                        <div className='flex items-center justify-center gap-3' >
+                        <div className='grid grid-cols-2 gap-4' >
                             <p className='text-sm text-sub_text_2' >Date of Birth</p>
                             <p className='text-dark_text text-sm' >{basicDetails?.dob}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >No of Children</p>
                             <p className='text-dark_text text-sm' >{personalDetails?.children}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Children Living Status</p>
                             <p className='text-dark_text text-sm' >{personalDetails?.childrenLiving}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Want More Kids</p>
                             <p className='text-dark_text text-sm' >{personalDetails?.moreKids}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Ethnic Background</p>
                             <p className='text-dark_text text-sm' >{personalDetails?.ethnicBackground}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Education</p>
                             <p className='text-dark_text text-sm' >{personalDetails?.education}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Occupation</p>
                             <p className='text-dark_text text-sm' >{personalDetails?.occupation}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Hobbies</p>
                             <p className='text-dark_text text-sm' >{personalDetails?.hobbies}</p>
                         </div>
@@ -208,33 +208,33 @@ const ViewProfilePage = () => {
 
                 {relegiousDetailsChevron && (
                     <div className='mt-5' >
-                        <div className='flex items-center justify-center gap-3' >
+                        <div className='grid grid-cols-2 gap-4' >
                             <p className='text-sm text-sub_text_2' >Religiosity</p>
                             <p className='text-dark_text text-sm' >{relegiousDetails?.religiosity}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Prayer</p>
                             <p className='text-dark_text text-sm' >{relegiousDetails?.prayer}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Revert</p>
                             <p className='text-dark_text text-sm' >{relegiousDetails?.revert}</p>
                         </div>
-                        {relegiousDetails?.revertDuration === '' ? <></> : <div className='flex items-center justify-center gap-3 mt-2' >
+                        {relegiousDetails?.revertDuration === '' ? <></> : <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Revert Duration</p>
                             <p className='text-dark_text text-sm' >{relegiousDetails?.revertDuration}</p>
                         </div>}
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Mosque Visit</p>
                             <p className='text-dark_text text-sm' >{relegiousDetails?.mosqueVisit}</p>
                         </div>
-                        {gender === 'male' ? <div className='flex items-center justify-center gap-3 mt-2' >
+                        {gender === 'male' ? <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Smoke</p>
                             <p className='text-dark_text text-sm' >{relegiousDetails?.smoke}</p>
-                        </div> : <><div className='flex items-center justify-center gap-3 mt-2' >
+                        </div> : <><div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Hijab</p>
                             <p className='text-dark_text text-sm' >{relegiousDetails?.hijab}</p>
-                        </div><div className='flex items-center justify-center gap-3 mt-2' >
+                        </div><div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Consider Wearing Hijab</p>
                             <p className='text-dark_text text-sm' >{relegiousDetails?.considerWearingHijab}</p>
                         </div></>}
@@ -251,53 +251,53 @@ const ViewProfilePage = () => {
 
                 {partnerPrefrencesChevron && (
                     <div className='mt-5' >
-                        <div className='flex items-center justify-center gap-3' >
+                        <div className='grid grid-cols-2 gap-4' >
                             <p className='text-sm text-sub_text_2' >Age Group From</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.ageGroupFrom}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Age Group To</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.ageGroupTo}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >State</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.state}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Marital Status</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.maritalStatus}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Relegious Preference</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.religiousPreference}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Ethnicity Preference</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.ethnicityPreference}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Education Level</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.educationLevel}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Work</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.work}</p>
                         </div>
-                        <div className='flex items-center justify-center gap-3 mt-2' >
+                        <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Consider Someone Having Children</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.considerSomeoneHavingChildren}</p>
                         </div>
-                        {gender === 'male' ? <div className='flex items-center justify-center gap-3 mt-2' >
+                        {gender === 'male' ? <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Hijab Preference</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.hijab}</p>
-                        </div> : <div className='flex items-center justify-center gap-3 mt-2' >
+                        </div> : <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Smoke Preference</p>
                             <p className='text-dark_text text-sm' >{partnerPrefrences?.smoke}</p>
                         </div>}
                     </div>
                 )}
 
-                <div className='flex items-center justify-center gap-3 mt-5 mb-10' >
+                <div className='grid grid-cols-2 gap-4 mt-5 mb-10' >
                     <p className='text-sm text-sub_text_2' >Profile Created By</p>
                     <p className='text-dark_text text-sm' >{basicDetails?.profileCreatedBy}</p>
                 </div>        

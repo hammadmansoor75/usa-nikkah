@@ -100,9 +100,9 @@ const ShortlistedByProfile = ({profile, removeFromShortlistedByUsers}) => {
   
 
   return (
-    <div className='bg-white border border-light_gray p-5 shadow-md w-full rounded-lg md:w-1/3' >
-        <div className='flex items-center justify-start gap-5' >
-            <div className='overflow-hidden rounded-full border-2 border-us_blue w-20 h-20' >
+    <div className='bg-white border border-light_gray p-5 shadow-md w-full rounded-lg md:w-1/2 lg:w-1/3' >
+        <div className='flex items-center justify-start gap-3' >
+            <div className='overflow-hidden rounded-full border-2 border-us_blue w-16 h-16' >
                 {profilePhoto && (
                     <Image onClick={handleProfileView} className='object-cover w-full h-full' src={profilePhoto} alt='profile' width={100} height={100}/>
                 )}
