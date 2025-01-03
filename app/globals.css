@@ -4,8 +4,10 @@
 
 /* Custom Background with Gradient, Image, and Opacity Adjustments */
 .custom-background {
-  background: linear-gradient(164deg, #C1EAFFBF 4.66%, #EFFAFF8F 97.61%);
-  background-blend-mode: multiply;
+  background-image : url('/assets/login-bg.svg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat; 
   position: relative;/* Prevent the image from repeating */
   height: 100vh; /* Full height of the screen */
 }
@@ -18,7 +20,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* Increased opacity of the dark overlay */
+  background: rgba(0, 0, 0, 0.1); /* Increased opacity of the dark overlay */
   z-index: 1; /* Ensure the overlay is beneath the content */
 }
 
