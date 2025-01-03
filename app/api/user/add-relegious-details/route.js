@@ -75,7 +75,7 @@ export async function GET(req) {
         if (religiousDetails) {
             return NextResponse.json(religiousDetails, { status: 200 });
         } else {
-            return NextResponse.json({ error: "Religious details not found" }, { status: 404 });
+            return NextResponse.json({ error: "Religious details not found" }, { status: 201 });
         }
     } catch (error) {
         console.error("RELEGIOUS DETAILS GET: ", error);

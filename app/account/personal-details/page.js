@@ -101,6 +101,8 @@ const PersonalDetailsPage = () => {
             setDetailedUser(responseUser.data);
             
             console.log(responseUser.data)
+        }else{
+            console.error('Error:', await responseUser.json());
         }
           
         } else {

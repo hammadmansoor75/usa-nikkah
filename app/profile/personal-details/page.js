@@ -71,6 +71,10 @@ const personalDetailsScehma = z.object({
 
 const PersonalDetailsPage = () => {
     const [user,setUser] = useState(null);
+
+    const [personalDetails, setPersonalDetails] = useState(null);
+    const [showChildrenLiving, setShowChildrenLiving] = useState(true);
+
     const router = useRouter();
     useEffect(() => {
         async function extractUser() {
@@ -83,6 +87,16 @@ const PersonalDetailsPage = () => {
               const data = await response.json();
               setUser(data);
               console.log('User:', data);
+              
+              const userId = data.id
+              const responseUser = await axios.get(`/api/user/add-personal-details?userId=${userId}`)
+              if(responseUser.status === 200){
+                setPersonalDetails(responseUser.data);
+                console.log(responseUser.data)
+            }else{
+                console.log(responseUser);
+            }
+
             } else {
               console.error('Error:', await response.json());
             }
@@ -102,34 +116,82 @@ const PersonalDetailsPage = () => {
 
     const onSubmit = async (data) => {
         try {
-            console.log(data);
-            console.log("SET USER: ", user);
-            const response = await axios.post('/api/user/add-personal-details', {
-                aboutMe : data.aboutMe,
-                height : data.height,
-                maritalStatus : data.maritalStatus,
-                children : data.children,
-                childrenLiving : data.childrenLiving,
-                moreKids : data.moreKids,
-                ethnicBackground : data.ethnicBackground,
-                occupation : data.occupation,
-                hobbies : data.hobbies,
-                education : data.education,
-                userId : user.id
-            });
-            if(response.status === 200){
-                router.push('/profile/relegious-details')
+            if(personalDetails){
+                const response = await axios.put('/api/user/add-personal-details', {
+                    aboutMe : data.aboutMe,
+                    height : data.height,
+                    maritalStatus : data.maritalStatus,
+                    children : data.children,
+                    childrenLiving : data.childrenLiving,
+                    moreKids : data.moreKids,
+                    ethnicBackground : data.ethnicBackground,
+                    occupation : data.occupation,
+                    hobbies : data.hobbies,
+                    education : data.education,
+                    userId : user.id
+                  })
+              
+                  if(response.status === 200){
+                    router.push('/profile/relegious-details');
+                  }else{
+                    alert("Something went wrong")
+                  }
+                
             }else{
-                console.log("Something went wrong!")
+                console.log(data);
+                console.log("SET USER: ", user);
+                const response = await axios.post('/api/user/add-personal-details', {
+                    aboutMe : data.aboutMe,
+                    height : data.height,
+                    maritalStatus : data.maritalStatus,
+                    children : data.children,
+                    childrenLiving : data.childrenLiving,
+                    moreKids : data.moreKids,
+                    ethnicBackground : data.ethnicBackground,
+                    occupation : data.occupation,
+                    hobbies : data.hobbies,
+                    education : data.education,
+                    userId : user.id
+                });
+                if(response.status === 200){
+                    router.push('/profile/relegious-details')
+                }else{
+                    alert("Something went wrong! Please Try Again!")
+                    console.log("Something went wrong!")
+                }
             }
         } catch (error) {
+            alert("Something went wrong! Please Try Again!")
             console.log(error)
         }
     }
 
+     useEffect(() => {
+             if (personalDetails) {
+              setValue("aboutMe", personalDetails.aboutMe || "");
+              setValue("height", personalDetails.height || "");
+              setValue("maritalStatus", personalDetails.maritalStatus || "");
+              setValue("children", personalDetails.children || "");
+              setValue("childrenLiving", personalDetails.childrenLiving || "");
+              setValue("moreKids", personalDetails.moreKids || "");
+              setValue("ethnicBackground", personalDetails.ethnicBackground || "");
+              setValue("education", personalDetails.education || "");
+              setValue("occupation", personalDetails.occupation || "");
+              setValue("hobbies", personalDetails.hobbies || "");
+             }
+      }, [personalDetails, setValue]);
+
+      const selectedChildren = watch("children");
+      useEffect(() => {
+        setShowChildrenLiving(selectedChildren !== "none");
+        if (selectedChildren === "none") {
+          setValue("childrenLiving", "");
+        }
+      }, [selectedChildren, setValue]);
+
 
   return (
-    <section className='mb-10' >
+    <section className='container max-w-screen-md mx-auto mb-10 overflow-hidden' >
         <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
             {/* <Link href='/auth' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link> */}
             <div className='w-full' >
@@ -145,7 +207,7 @@ const PersonalDetailsPage = () => {
             </div>
 
             <div className='flex items-center justify-center mt-5' >
-                <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20' >
+                <form onSubmit={handleSubmit(onSubmit)} className='px-5 md:px-20' >
                     <div className='flex flex-col items-start justify-start' >
                         <label className='text-sub_text_2 text-sm' >About Me: No Contact Details Allowed</label>
                         <textarea className='w-[295px] h-[82px] rounded-md border border-light_gray p-2 mt-2'  {...register("aboutMe")}  />
@@ -153,7 +215,7 @@ const PersonalDetailsPage = () => {
                     </div>
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Height</label>
-                        <Select onValueChange={(value) => setValue("height", value)} >
+                        <Select onValueChange={(value) => setValue("height", value)} value={watch("height")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -168,7 +230,7 @@ const PersonalDetailsPage = () => {
 
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Marital Status</label>
-                        <Select onValueChange={(value) => setValue("maritalStatus", value)} >
+                        <Select onValueChange={(value) => setValue("maritalStatus", value)} value={watch("maritalStatus")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -183,7 +245,7 @@ const PersonalDetailsPage = () => {
 
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Children</label>
-                        <Select onValueChange={(value) => setValue("children", value)} >
+                        <Select onValueChange={(value) => setValue("children", value)} value={watch("children")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -198,9 +260,10 @@ const PersonalDetailsPage = () => {
                         {errors.children && <p className="text-red-500 mt-2 text-sm">{errors.children.message}</p>}
                     </div>
 
-                    <div className="mt-3 grid grid-cols-2" >
+                    {showChildrenLiving && (
+                        <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Children Living Status</label>
-                        <Select onValueChange={(value) => setValue("childrenLiving", value)} >
+                        <Select onValueChange={(value) => setValue("childrenLiving", value)} value={watch("childrenLiving")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -213,10 +276,11 @@ const PersonalDetailsPage = () => {
                         </Select>
                         {errors.childrenLiving && <p className="text-red-500 mt-2 text-sm">{errors.childrenLiving.message}</p>}
                     </div>
+                    )}
 
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Want More Kids</label>
-                        <Select onValueChange={(value) => setValue("moreKids", value)} >
+                        <Select onValueChange={(value) => setValue("moreKids", value)} value={watch("moreKids")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -231,7 +295,7 @@ const PersonalDetailsPage = () => {
 
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Ethnic Background</label>
-                        <Select onValueChange={(value) => setValue("ethnicBackground", value)} >
+                        <Select onValueChange={(value) => setValue("ethnicBackground", value)} value={watch("ethnicBackground")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -253,7 +317,7 @@ const PersonalDetailsPage = () => {
 
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Education</label>
-                        <Select onValueChange={(value) => setValue("education", value)} >
+                        <Select onValueChange={(value) => setValue("education", value)} value={watch("education")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>

@@ -128,14 +128,14 @@ const SignupPage = () => {
                         </div>
                         {errors.city && <p className="text-red-500 text-sm mt-2" >{errors.city.message}</p>}
 
-                        <div className="mt-3" >
+                        <div className="mt-4" >
                             <Select onValueChange={(value) => setValue("state", value)} >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a state" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {US_STATES.map((state) => (
-                                        <SelectItem key={state} value={state} >{state}</SelectItem>
+                                        <SelectItem key={state} className="text-lgs" value={state} >{state}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -143,7 +143,7 @@ const SignupPage = () => {
                         </div>
 
 
-                        <div className="mt-3 flex items-center justify-between" >
+                        <div className="mt-5 flex items-center justify-between" >
                             <label className="text-sub_text_2 text-sm" >Gender</label>
                             <RadioGroup
                                 onValueChange={(value) => setValue("gender", value)}
@@ -158,14 +158,14 @@ const SignupPage = () => {
                             
                         </div>
                         {errors.gender && <p className="text-red-500 mt-2 text-sm">{errors.gender.message}</p>}
-                        <div className="flex items-center justify-between gap-1 mt-3" >
+                        <div className="flex items-center justify-between gap-1 mt-5" >
                             <label className="text-sub_text_2 text-sm">Date of Birth </label>
                             <input {...register("dob")} type="date" placeholder="DOB" className=""  />
                         </div>
                         {errors.dob && <p className="text-red-500 text-sm mt-2" >{errors.dob.message}</p>}
 
-                        <div className="mt-3" >
-                            <label className="text-sub_text_2 text-sm mb-3">Profile Created By</label>
+                        <div className="mt-5" >
+                            <label className="text-sub_text_2 text-sm mb-4">Profile Created By</label>
                             <Select onValueChange={(value) => setValue("profileCreatedBy", value)} >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select an option" />
@@ -182,11 +182,11 @@ const SignupPage = () => {
                             {errors.profileCreatedBy && <p className="text-red-500 mt-2 text-sm">{errors.profileCreatedBy.message}</p>}
                         </div>
 
-                        <div className="flex items-center justify-center" ><button type="submit" className="blue-button mt-3" >SIGN UP</button></div>
+                        <div className="flex items-center justify-center" ><button type="submit" className="blue-button mt-5" >SIGN UP</button></div>
 
-                        <p className="text-center mt-3 text-sm text-dark_text" >Your contact details will not be visible to other members and will remain private. </p>
+                        <p className="text-center mt-5 text-sm text-dark_text" >Your contact details will not be visible to other members and will remain private. </p>
 
-                        <p className="text-center mt-3 text-sm text-dark_text" >By signing up, you agree to our <Link href='/privacy' className="text-us_blue underline" >Privacy Policy</Link> and <Link href='/terms' className="text-us_blue underline" >Terms & Conditions.</Link></p>
+                        <p className="text-center mt-5 mb-5 text-sm text-dark_text" >By signing up, you agree to our <Link href='/privacy' className="text-us_blue underline" >Privacy Policy</Link> and <Link href='/terms' className="text-us_blue underline" >Terms & Conditions.</Link></p>
  
                     </form>
 

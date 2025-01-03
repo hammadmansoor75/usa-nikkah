@@ -67,6 +67,8 @@ const PartnerPrefrencesPage = () => {
     const [schema,setScehma] = useState(null);
     const [gender,setGender] = useState(null);
     const router = useRouter();
+
+    const [partnerPrefrences, setPartnerPrefrences] = useState(null);
      
     useEffect(() => {
         async function extractUser() {
@@ -82,10 +84,21 @@ const PartnerPrefrencesPage = () => {
                 setGender(data.gender);
                 const generatedSchema = generatePartnerSchema(data.gender)
                 setScehma(generatedSchema);
+                fetchPartnerPreferencs(data.id);
             } else {
                 console.error('Error:', await response.json());
             }
         };
+        async function fetchPartnerPreferencs(userId) {
+            const response = await axios.get(`/api/user/add-partner-prefrence?userId=${userId}`)
+
+            if (response.status === 200) {
+                console.log(response.data)
+                setPartnerPrefrences(response.data);
+            } else {
+                console.error('Error fetching partner preferences:', response.error);
+            }
+        }
         extractUser();
     },[]);
 
@@ -101,56 +114,101 @@ const PartnerPrefrencesPage = () => {
         resolver: zodResolver(schema),
     });
 
+    useEffect(() => {
+             if (partnerPrefrences) {
+                setValue("ageGroupFrom", partnerPrefrences?.ageGroupFrom || "");
+                setValue("ageGroupTo", partnerPrefrences?.ageGroupTo || "");
+                setValue("state", partnerPrefrences?.state || "");
+                setValue("maritalStatus", partnerPrefrences?.maritalStatus || "");
+                setValue("relegiousPrefrence", partnerPrefrences?.religiousPreference || "");
+                setValue("ethnicityPrefrence", partnerPrefrences?.ethnicityPreference || "");
+                setValue("educationLevel", partnerPrefrences?.educationLevel || "");
+                setValue("work", partnerPrefrences?.work || "");
+                setValue("considerSomeoneHavingChildren", partnerPrefrences?.considerSomeoneHavingChildren || "");
+              if(gender === 'male'){
+                setValue("hijab", partnerPrefrences?.hijab || "");
+              }
+              if(gender === 'female'){
+                setValue("smoke", partnerPrefrences?.smoke || "");
+              }
+             }
+    }, [partnerPrefrences, setValue, gender]);
+
     const onSubmit = async (data) => {
         try {
-            console.log(data);
-            if(gender === 'male'){
-                const response = await axios.post("/api/user/add-partner-prefrence", {
-                    gender : 'female',
-                    ageGroupFrom : data.ageGroupFrom,
-                    ageGroupTo : data.ageGroupTo,
-                    state : data.state,
-                    maritalStatus : data.maritalStatus,
-                    religiousPreference : data.relegiousPrefrence,
-                    ethnicityPreference : data.ethnicityPrefrence,
-                    educationLevel : data.educationLevel,
-                    work : data.work,
-                    considerSomeoneHavingChildren : data.considerSomeoneHavingChildren,
-                    smoke : data.smoke,
-                    userId : user.id
-                });
-                if(response.status === 200){
-                    // router.push('/profile/partner-prefrences')
-                    console.log(response.data)
-                }else{
-                    console.log(response.error);
+            if(partnerPrefrences){
+                let response;
+                if (gender === 'male') {
+                    response = await axios.put('/api/user/add-partner-prefrence', {
+                        ...data,
+                        userId: user.id,
+                    });
+                } else if (gender === 'female') {
+                    response = await axios.put('/api/user/add-partner-prefrence', {
+                        ...data,
+                        userId: user.id,
+                    });
                 }
-            }
 
-            if(gender === 'female'){
-                const response = await axios.post("/api/user/add-partner-prefrence", {
-                    gender : 'male',
-                    ageGroupFrom : data.ageGroupFrom,
-                    ageGroupTo : data.ageGroupTo,
-                    state : data.state,
-                    maritalStatus : data.maritalStatus,
-                    religiousPreference : data.relegiousPrefrence,
-                    ethnicityPreference : data.ethnicityPrefrence,
-                    educationLevel : data.educationLevel,
-                    work : data.work,
-                    considerSomeoneHavingChildren : data.considerSomeoneHavingChildren,
-                    hijab : data.hijab,
-                    userId : user.id
-                });
-                if(response.status === 200){
+                if (response.status === 200) {
                     router.push('/photo/photo-upload')
-                    console.log(response.data)
-                }else{
-                    console.log(response.error);
+                } else {
+                    alert("Something went wrong! Please try again.");
+                    console.log('Error updating details:', response.error);
+                }
+            }else{
+                console.log(data);
+                if(gender === 'male'){
+                    const response = await axios.post("/api/user/add-partner-prefrence", {
+                        gender : 'female',
+                        ageGroupFrom : data.ageGroupFrom,
+                        ageGroupTo : data.ageGroupTo,
+                        state : data.state,
+                        maritalStatus : data.maritalStatus,
+                        religiousPreference : data.relegiousPrefrence,
+                        ethnicityPreference : data.ethnicityPrefrence,
+                        educationLevel : data.educationLevel,
+                        work : data.work,
+                        considerSomeoneHavingChildren : data.considerSomeoneHavingChildren,
+                        smoke : data.smoke,
+                        userId : user.id
+                    });
+                    if(response.status === 200){
+                        router.push('/photo/photo-upload')
+                        console.log(response.data)
+                    }else{
+                        alert("Something went wrong! Please try again.");
+                        console.log(response.error);
+                    }
+                }
+
+                if(gender === 'female'){
+                    const response = await axios.post("/api/user/add-partner-prefrence", {
+                        gender : 'male',
+                        ageGroupFrom : data.ageGroupFrom,
+                        ageGroupTo : data.ageGroupTo,
+                        state : data.state,
+                        maritalStatus : data.maritalStatus,
+                        religiousPreference : data.relegiousPrefrence,
+                        ethnicityPreference : data.ethnicityPrefrence,
+                        educationLevel : data.educationLevel,
+                        work : data.work,
+                        considerSomeoneHavingChildren : data.considerSomeoneHavingChildren,
+                        hijab : data.hijab,
+                        userId : user.id
+                    });
+                    if(response.status === 200){
+                        router.push('/photo/photo-upload')
+                        console.log(response.data)
+                    }else{
+                        alert("Something went wrong! Please try again.");
+                        console.log(response.error);
+                    }
                 }
             }
             
         } catch (error) {
+            alert("Something went wrong! Please try again.");
             console.log(error)
         }
     }
@@ -178,7 +236,7 @@ const PartnerPrefrencesPage = () => {
                         <label className="text-sub_text_2 text-sm mb-3" >Age Group: </label>
                         <div className='grid grid-cols-3 items-baseline mt-2' >
                             <div className='' >
-                                <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupFrom", value)} >
+                                <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupFrom", value)} value={watch("ageGroupFrom")}  >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
@@ -194,7 +252,7 @@ const PartnerPrefrencesPage = () => {
                                 <label className="text-sub_text_2 text-sm mb-3 text-center"  >To</label>
                             </div>
                             <div className='' >
-                                <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupTo", value)} >
+                                <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupTo", value)} value={watch("ageGroupTo")}  >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
@@ -212,7 +270,7 @@ const PartnerPrefrencesPage = () => {
 
                     <div className="mt-3" >
                         <label className="text-sub_text_2 text-sm mb-3" >State: </label>
-                        <div className='mt-2' ><Select  onValueChange={(value) => setValue("state", value)} >
+                        <div className='mt-2' ><Select  onValueChange={(value) => setValue("state", value)} value={watch("state")}  >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a state" />
                             </SelectTrigger>
@@ -229,7 +287,7 @@ const PartnerPrefrencesPage = () => {
                     <div className="mt-3" >
                         <label className="text-sub_text_2 text-sm mb-3">Marital Status</label>
                         <div className='mt-2' >
-                            <Select onValueChange={(value) => setValue("maritalStatus", value)} >
+                            <Select onValueChange={(value) => setValue("maritalStatus", value)} value={watch("maritalStatus")}  >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
@@ -245,7 +303,7 @@ const PartnerPrefrencesPage = () => {
 
                     <div className="mt-3" >
                         <label className="text-sub_text_2 text-sm mb-3">Relegiousity Prefrence</label>
-                        <Select className="text-sub_text_2"  onValueChange={(value) => setValue("relegiousPrefrence", value)} >
+                        <Select className="text-sub_text_2"  onValueChange={(value) => setValue("relegiousPrefrence", value)} value={watch("relegiousPrefrence")}  >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -263,7 +321,7 @@ const PartnerPrefrencesPage = () => {
                         <div className="mt-3" >
                             <label className="text-sub_text_2 text-sm mb-3">Do you prefer a sister who wears the hijab?</label>
                             <div className='mt-2' >
-                                <Select className="text-sub_text_2"  onValueChange={(value) => setValue("hijab", value)} >
+                                <Select className="text-sub_text_2"  onValueChange={(value) => setValue("hijab", value)} value={watch("hijab")}  >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
@@ -283,7 +341,7 @@ const PartnerPrefrencesPage = () => {
                         <div className="mt-3" >
                             <label className="text-sub_text_2 text-sm mb-3">Would you consider a brother who smokes?</label>
                             <div className='mt-2' >
-                                <Select className="text-sub_text_2"  onValueChange={(value) => setValue("smoke", value)} >
+                                <Select className="text-sub_text_2"  onValueChange={(value) => setValue("smoke", value)} value={watch("smoke")}  >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
@@ -301,7 +359,7 @@ const PartnerPrefrencesPage = () => {
                     <div className="mt-3" >
                         <label className="text-sub_text_2 text-sm mb-3">Ethnicity Prefrence</label>
                         <div className='mt-2' >
-                        <Select onValueChange={(value) => setValue("ethnicityPrefrence", value)} >
+                        <Select onValueChange={(value) => setValue("ethnicityPrefrence", value)} value={watch("ethnicityPrefrence")}  >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -327,7 +385,7 @@ const PartnerPrefrencesPage = () => {
                     <div className="mt-3" >
                         <label className="text-sub_text_2 text-sm mb-3">Education Level</label>
                         <div className='mt-2' >
-                        <Select onValueChange={(value) => setValue("educationLevel", value)} >
+                        <Select onValueChange={(value) => setValue("educationLevel", value)} value={watch("educationLevel")}  >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -350,7 +408,7 @@ const PartnerPrefrencesPage = () => {
                             {gender === 'male' ? 'Work: Your husband wants you to be...' :'Work: Are you looking for...'}
                         </label>
                         <div className='mt-2' >
-                        <Select onValueChange={(value) => setValue("work", value)} >
+                        <Select onValueChange={(value) => setValue("work", value)} value={watch("work")}  >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -370,7 +428,7 @@ const PartnerPrefrencesPage = () => {
                             Are you willing to consider someone with children?
                         </label>
                         <div className='mt-2' >
-                        <Select onValueChange={(value) => setValue("considerSomeoneHavingChildren", value)} >
+                        <Select onValueChange={(value) => setValue("considerSomeoneHavingChildren", value)} value={watch("considerSomeoneHavingChildren")}  >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>

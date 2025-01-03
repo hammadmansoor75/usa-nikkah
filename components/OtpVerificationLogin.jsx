@@ -84,31 +84,10 @@ const OtpVerificationLogin = ({phone}) => {
         <div className='flex flex-col items-center justify-center mt-10' >
             <p className='text-sm text-sub_text_2 mt-5' >Type the verification code we’ve sent you.</p>
             <div className='input mt-3' >
-                <input className='placeholder-sub_text_2' maxLength={6} onChange={(e) => setOtp(e.target.value)} value={otp} placeholder='' type='text' />
+                <input className='placeholder-sub_text_2' inputMode='numeric' maxLength={6} onChange={(e) => setOtp(e.target.value)} value={otp} placeholder='' type='text' />
             </div>
 
-            <div className='mt-5' >
-                <div className='flex items-center justify-center gap-24 mt-3' >
-                    <p className='text-3xl cursor-pointer ' onClick={() => handleOtpChange(1)} >1</p>
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(2)} >2</p>
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(3)}>3</p>
-                </div>
-                <div className='flex items-center justify-center gap-24 mt-3' >
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(4)}>4</p>
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(5)}>5</p>
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(6)}>6</p>
-                </div>
-                <div className='flex items-center justify-center gap-24 mt-3' >
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(7)}>7</p>
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(8)}>8</p>
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(9)}>9</p>
-                </div>
-                <div className='flex items-center justify-center gap-24 mt-3' >
-                    <p className='text-3xl text-white' >0</p>
-                    <p className='text-3xl cursor-pointer' onClick={() => handleOtpChange(0)}>0</p>
-                    <p className='text-3xl cursor-pointer' onClick={() => handleBackspace}><BackspaceIcon /></p>
-                </div>
-            </div>
+            
 
             <div className='flex flex-col items-center justify-center mt-5' >
                 {isTimerActive ? (

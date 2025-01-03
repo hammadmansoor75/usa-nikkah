@@ -7,6 +7,7 @@ import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import ClipLoader from 'react-spinners/ClipLoader'
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 
 
@@ -263,9 +264,11 @@ const PhotoUploadPage = () => {
         router.push('/homepage')
         
       }else{
+        alert('Something went wrong! Please try again!')
         console.log(response.error)
       }
     } catch (error) {
+      alert('Something went wrong! Please try again!')
       console.log(error);
     }
   }
@@ -273,14 +276,14 @@ const PhotoUploadPage = () => {
   return (
     <main>
       <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
-        <div className="cursor-pointer" ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></div>
+        <Link href='/profile/partner-prefrences' className="cursor-pointer" ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
         <div className='w-full' >
           <h1 className='text-center text-xl font-medium' >Photos</h1>
         </div>
       </div>
 
 
-      <div className='mt-5 px-10 md:px-20' > 
+      <div className='mt-5 mb-10 px-10 md:px-20' > 
         <div className='flex items-center justify-between gap-5' >
           <div>
             <p className='text-sm text-sub_text_2' >Profile Photo: <span className='text-red-600 text-xs' >*Required</span></p>

@@ -85,7 +85,7 @@ export async function GET(req) {
         if (partnerPreferences) {
             return NextResponse.json(partnerPreferences, { status: 200 });
         } else {
-            return NextResponse.json({ error: "Preferences not found" }, { status: 404 });
+            return NextResponse.json({ error: "Preferences not found" }, { status: 201 });
         }
     } catch (error) {
         console.error("PARTNER PREFERENCES RETRIEVAL: ", error);

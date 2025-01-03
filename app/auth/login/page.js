@@ -55,7 +55,7 @@ const sendOtp = async (formData) => {
       {step === 1 && (
         <section>
           <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
-            <div className="cursor-pointer" onClick={() => setStep(1)} ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></div>
+            <Link href='/auth' className="cursor-pointer" ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
               <div className='w-full' >
                 <h1 className='text-center text-xl font-medium' >My Mobile</h1>
               </div>

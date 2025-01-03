@@ -59,7 +59,7 @@ export async function GET(req) {
       });
   
       if (!personalDetails) {
-        return NextResponse.json({ error: "Personal details not found" }, { status: 404 });
+        return NextResponse.json({ error: "Personal details not found" }, { status: 201 });
       }
   
       return NextResponse.json(personalDetails, { status: 200 });

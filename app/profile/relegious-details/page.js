@@ -44,6 +44,7 @@ const RelegiousDetailsPage = () => {
     const [user,setUser] = useState(null);
     const [schema,setScehma] = useState(null);
     const [gender,setGender] = useState(null);
+    const [religiousDetails, setReligiousDetails] = useState(null);
     const router = useRouter();
  
     useEffect(() => {
@@ -60,6 +61,14 @@ const RelegiousDetailsPage = () => {
               setGender(data.gender);
               const generatedSchema = generateRelegiousSchema(data.gender)
               setScehma(generatedSchema);
+
+              const responseReligiousDetails = await axios.get(`/api/user/add-relegious-details?userId=${data.id}`)
+              if (responseReligiousDetails.status === 200) {
+                    console.log(responseReligiousDetails.data);
+                    setReligiousDetails(responseReligiousDetails.data);
+                } else {
+                    console.log(responseReligiousDetails.data);
+                }
             } else {
               console.error('Error:', await response.json());
             }
@@ -80,48 +89,94 @@ const RelegiousDetailsPage = () => {
         resolver: zodResolver(schema),
     });
 
+
+    useEffect(() => {
+        if (religiousDetails) {
+           setValue("religiosity", religiousDetails?.religiosity || "");
+           setValue("prayer", religiousDetails?.prayer || "");
+           setValue("revert", religiousDetails?.revert || "");
+           setValue("revertDuration", religiousDetails?.revertDuration || "");
+           setValue("mosqueVisit", religiousDetails?.mosqueVisit || "");
+         if(gender === 'male'){
+           setValue("smoke", religiousDetails?.smoke || "");
+         }
+         if(gender === 'female'){
+           setValue("hijab", religiousDetails?.hijab || "");
+           setValue("considerWearingHijab", religiousDetails?.considerWearingHijab || "");
+         }
+        }
+ }, [religiousDetails, setValue, gender]);
+
     const onSubmit = async (data) => {
         try {
-            console.log(data);
-            if(gender === 'male'){
-                const response = await axios.post("/api/user/add-relegious-details", {
-                    religiosity : data.religiosity,
-                    prayer : data.prayer,
-                    revert : data.revert,
-                    revertDuration : data.revertDuration,
-                    mosqueVisit : data.mosqueVisit,
-                    smoke : data.smoke,
-                    userId : user.id
-                });
-                if(response.status === 200){
-                    router.push('/profile/partner-prefrences')
-                }else{
-                    console.log(response.error);
+            if(religiousDetails){
+                let response;
+                if (gender === 'male') {
+                    response = await axios.put('/api/user/add-relegious-details', {
+                        ...data,
+                        userId: user.id,
+                    });
+                } else if (gender === 'female') {
+                    response = await axios.put('/api/user/add-relegious-details', {
+                        ...data,
+                        userId: user.id,
+                    });
                 }
-            }
 
-            if(gender === 'female'){
-                const response = await axios.post("/api/user/add-relegious-details", {
-                    religiosity : data.religiosity,
-                    prayer : data.prayer,
-                    revert : data.revert,
-                    revertDuration : data.revertDuration,
-                    mosqueVisit : data.mosqueVisit,
-                    hijab : data.hijab,
-                    considerWearingHijab : data.considerWearingHijab,
-                    userId : user.id
-                });
-                if(response.status === 200){
-                    router.push('/profile/partner-prefrences')
-                }else{
-                    console.log(response.error);
+                if (response.status === 200) {
+                    router.push('/profile/partner-prefrences');
+                } else {
+                    alert("Something Went Wrong! Please try again!")
+                    console.log('Error updating details:', response.error);
+                }
+            }else{
+                console.log(data);
+                if(gender === 'male'){
+                    const response = await axios.post("/api/user/add-relegious-details", {
+                        religiosity : data.religiosity,
+                        prayer : data.prayer,
+                        revert : data.revert,
+                        revertDuration : data.revertDuration,
+                        mosqueVisit : data.mosqueVisit,
+                        smoke : data.smoke,
+                        userId : user.id
+                    });
+                    if(response.status === 200){
+                        router.push('/profile/partner-prefrences')
+                    }else{
+                        alert("Something Went Wrong! Please try again!")
+                        console.log(response.error);
+                    }
+                }
+
+                if(gender === 'female'){
+                    const response = await axios.post("/api/user/add-relegious-details", {
+                        religiosity : data.religiosity,
+                        prayer : data.prayer,
+                        revert : data.revert,
+                        revertDuration : data.revertDuration,
+                        mosqueVisit : data.mosqueVisit,
+                        hijab : data.hijab,
+                        considerWearingHijab : data.considerWearingHijab,
+                        userId : user.id
+                    });
+                    if(response.status === 200){
+                        router.push('/profile/partner-prefrences')
+                    }else{
+                        alert("Something Went Wrong! Please try again!")
+                        console.log(response.error);
+                    }
                 }
             }
             
         } catch (error) {
+            alert("Something Went Wrong! Please try again!")
             console.log(error)
         }
     }
+
+
+
 
   return (
     <section className='mb-10' >
@@ -144,12 +199,12 @@ const RelegiousDetailsPage = () => {
                 <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20 w-full md:w-1/2' >
                     <div className="mt-3 grid grid-cols-2 items-baseline" >
                         <label className="text-sub_text_2 text-sm mb-3">Religiosity</label>
-                        <Select className="text-sub_text_2"  onValueChange={(value) => setValue("religiosity", value)} >
+                        <Select className="text-sub_text_2"  onValueChange={(value) => setValue("religiosity", value)} value={watch("religiosity")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Relegious" >Relegious</SelectItem>
+                                <SelectItem value="Relegious" >Religious</SelectItem>
                                 <SelectItem value="Moderate" >Moderate</SelectItem>
                                 <SelectItem value="Liberal" >Liberal</SelectItem>
                             </SelectContent>
@@ -159,7 +214,7 @@ const RelegiousDetailsPage = () => {
 
                     <div className="mt-5 grid grid-cols-2 items-baseline" >
                         <label className="text-sub_text_2 text-sm mb-3">Your Prayer</label>
-                        <Select className="text-sub_text_2"  onValueChange={(value) => setValue("prayer", value)} >
+                        <Select className="text-sub_text_2"  onValueChange={(value) => setValue("prayer", value)} value={watch("prayer")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -179,6 +234,7 @@ const RelegiousDetailsPage = () => {
                         <label className="text-sub_text_2 text-sm" >Are you a Revert?</label>
                         <RadioGroup
                             onValueChange={(value) => setValue("revert", value)}
+                            value={watch("revert")}
                             className="flex items-center justify-center gap-2"
                         >
                             <RadioGroupItem value="yes" id="yes" />
@@ -202,7 +258,7 @@ const RelegiousDetailsPage = () => {
 
                     <div className="mt-5" >
                         <label className="text-sub_text_2 text-sm mb-3">How often do you visit the masjid?</label>
-                        <Select className="text-sub_text_2 mt-2"  onValueChange={(value) => setValue("mosqueVisit", value)} >
+                        <Select className="text-sub_text_2 mt-2"  onValueChange={(value) => setValue("mosqueVisit", value)} value={watch("mosqueVisit")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -224,6 +280,7 @@ const RelegiousDetailsPage = () => {
                                 <label className="text-sub_text_2 text-sm" >Do you smoke?</label>
                                 <RadioGroup
                                     onValueChange={(value) => setValue("smoke", value)}
+                                    value={watch("smoke")}
                                     className="flex items-center justify-center gap-2"
                                 >
                                     <RadioGroupItem value="yes" id="yes" />
@@ -245,6 +302,7 @@ const RelegiousDetailsPage = () => {
                                 <label className="text-sub_text_2 text-sm" >Do you wear hijab?</label>
                                 <RadioGroup
                                     onValueChange={(value) => setValue("hijab", value)}
+                                    value={watch("hijab")}
                                     className="flex items-center justify-center gap-2"
                                 >
                                     <RadioGroupItem value="yes" id="yes" />
@@ -259,7 +317,7 @@ const RelegiousDetailsPage = () => {
 
                             <div className="mt-5" >
                                 <label className="text-sub_text_2 text-sm mb-3">If no, will you consider wearing it?</label>
-                                <Select className="text-sub_text_2 mt-2"  onValueChange={(value) => setValue("considerWearingHijab", value)} >
+                                <Select className="text-sub_text_2 mt-2"  onValueChange={(value) => setValue("considerWearingHijab", value)} value={watch("considerWearingHijab")} >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
