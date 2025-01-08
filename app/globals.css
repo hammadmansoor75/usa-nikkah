@@ -81,6 +81,29 @@
   height: 50px;
 }
 
+.home-blue-btn{
+  background-color: rgba(4, 30, 66, 1);
+  color: white;
+  width: 120px;
+  padding: 10px !important;
+  border-radius: 50px;
+  cursor: pointer;
+  height : 35px;
+  font-size: 12px;
+}
+
+
+.home-red-btn{
+  background-color: #BF0D3E ;
+  color: white;
+  width: 120px;
+  padding: 10px !important;
+  border-radius: 50px;
+  cursor: pointer;
+  height : 35px;
+  font-size: 12px;
+}
+
 input:focus {
   outline: none;
   box-shadow: none;

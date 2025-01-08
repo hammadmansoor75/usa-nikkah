@@ -62,7 +62,7 @@ const AccountMainPage = () => {
         <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
             <Link href='/homepage' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
-                <h1 className='text-center text-xl font-medium' >Account</h1>
+                <h1 className='text-center text-us_blue text-xl font-semibold' >Account</h1>
             </div>
         </div>
 
@@ -72,10 +72,10 @@ const AccountMainPage = () => {
                     <Image src={profilePicture} className='rounded-md border-2 border-us_blue' alt='profile' height={200} width={150} />
                 )}
                 <div>
-                    <h1 className='text-md text-us_blue font-semibold' >{detailedUser?.name}</h1>
-                    <p className='text-sm text-sub_text_2' >{calculateAge(detailedUser?.dob)} , {personalDetails?.maritalStatus}</p>
-                    <p className="text-sm text-sub_text_2" >{detailedUser?.city}</p>
-                    <p className="text-sm text-sub_text_2" >{detailedUser?.state}</p>
+                    <h1 className='text-md text-us_blue font-semibold capitalize' >{detailedUser?.name}</h1>
+                    <p className='text-sm text-sub_text_2 capitalize' >{calculateAge(detailedUser?.dob)} , {personalDetails?.maritalStatus}</p>
+                    <p className="text-sm text-sub_text_2 capitalize" >{detailedUser?.city}</p>
+                    <p className="text-sm text-sub_text_2 capitalize" >{detailedUser?.state}</p>
                     <button className='bg-us_blue text-white px-5 py-2 mt-2 rounded-full text-sm' >UPGRADE PLAN</button>
                 </div>
             </div>

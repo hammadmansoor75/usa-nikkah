@@ -42,8 +42,9 @@ const OtpVerification = ({phone}) => {
         setOtp('');
         setTimer(60);
         setIsTimerActive(true);
+        const phoneWithCode = `+1${formData.phone.replace(/^(\+1|1)?/, '')}`;
         const { data, error } = await supabase.auth.signInWithOtp({
-            phone: phone,
+            phone: phoneWithCode,
         })
     }
 
@@ -65,6 +66,7 @@ const OtpVerification = ({phone}) => {
                 if(response.status === 201){
                     router.push('/profile/personal-details')
                 }else{
+                    alert("Account Exists! Login to continue")
                     console.log(response.error)
                 }
             }

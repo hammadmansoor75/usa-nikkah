@@ -17,7 +17,7 @@ const AuthPage = () => {
             <div className='mt-5' >
                 <Image src='/assets/login-image.svg' alt='loginImage' height={300} width={300} />
             </div>
-            <div className='flex flex-col items-center justify-center gap-2 mt-5' >
+            <div className='flex flex-col items-center justify-center gap-4 mt-5' >
                 <Link href='/auth/login' ><button className='blue-button flex items-center justify-center gap-4 ' ><PhoneAndroidIcon />LOGIN WITH PHONE</button></Link>
                 <Link href='/auth/signup' ><button className='white-button flex items-center justify-center gap-4' ><AccountCircleIcon />NO ACCOUNT? SIGNUP</button></Link>
             </div>

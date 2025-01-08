@@ -83,6 +83,7 @@ const ReligiousDetailsEditPage = () => {
         handleSubmit,
         setValue,
         watch,
+        reset,
         formState: { errors },
     } = useForm({
         resolver: zodResolver(schema),
@@ -105,6 +106,12 @@ const ReligiousDetailsEditPage = () => {
               }
              }
       }, [relegiousDetails, setValue, gender]);
+
+    useEffect(() => {
+        if(schema){
+            reset(relegiousDetails)
+        }
+    },[schema, relegiousDetails, reset])
 
     const onSubmit = async (data) => {
         try {
@@ -131,11 +138,11 @@ const ReligiousDetailsEditPage = () => {
         }
     };
 
-    if (!relegiousDetails) {
-        return <div className='flex items-center justify-center my-auto' >
-            <ClipLoader size={40} />
-        </div>;
-    }
+    // if (!relegiousDetails) {
+    //     return <div className='flex items-center justify-center my-auto' >
+    //         <ClipLoader size={40} />
+    //     </div>;
+    // }
 
     return (
         <section className="mb-10">
@@ -155,12 +162,12 @@ const ReligiousDetailsEditPage = () => {
                     <form onSubmit={handleSubmit(onSubmit)} className="px-10 md:px-20 w-full md:w-1/2">
                         <div className="mt-3 grid grid-cols-2 items-baseline">
                             <label className="text-sub_text_2 text-sm mb-3">Religiosity</label>
-                            <Select className="text-sub_text_2" onValueChange={(value) => setValue('religiosity', value)} value={watch("religiosity")}>
+                            <Select className="text-sub_text_2" onValueChange={(value) => setValue("religiosity", value)} value={watch("religiosity")}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Religious">Religious</SelectItem>
+                                    <SelectItem value="Relegious">Religious</SelectItem>
                                     <SelectItem value="Moderate">Moderate</SelectItem>
                                     <SelectItem value="Liberal">Liberal</SelectItem>
                                 </SelectContent>

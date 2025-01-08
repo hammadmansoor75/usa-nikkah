@@ -60,7 +60,7 @@ const personalDetailsScehma = z.object({
     height : z.string().nonempty({ message: "Height is required" }),
     maritalStatus : z.string().nonempty({ message: "Marital Status is required" }),
     children : z.string().nonempty({ message: "No of Children is required" }),
-    childrenLiving : z.string().nonempty({ message: "Children Living Status is required" }),
+    childrenLiving : z.string().optional(),
     moreKids : z.string().nonempty({ message: "Want More Kids is required" }),
     ethnicBackground : z.string().nonempty({ message: "Ethnic Background is required" }),
     occupation : z.string().nonempty({ message: "Occupation is required" }).refine((value) => /^[A-Za-z\s]+$/.test(value), {
@@ -135,7 +135,7 @@ const PersonalDetailsPage = () => {
       height : data.height,
       maritalStatus : data.maritalStatus,
       children : data.children,
-      childrenLiving : data.childrenLiving,
+      childrenLiving : data.childrenLiving || "",
       moreKids : data.moreKids,
       ethnicBackground : data.ethnicBackground,
       occupation : data.occupation,

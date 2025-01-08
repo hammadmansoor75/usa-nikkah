@@ -157,17 +157,17 @@ const MatchesPage = () => {
 
 
   return (
-    <section className='mb-10' >
+    <section className='mb-10 pb-10' >
         <div className='flex md:hidden' >
             <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
                 <Link href='/homepage' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
                 <div className='w-full' >
-                    <h1 className='text-center text-xl font-medium' >Matches</h1>
+                    <h1 className='text-center text-us_blue text-xl font-semibold' >Matches</h1>
                 </div>
             </div>
         </div>
 
-        <div className='mt-10 px-10 md:px-20' >
+        <div className='mt-5 px-5 md:px-20' >
             <div className='flex gap-4 md:items-center md:justify-center overflow-x-auto pb-2' >
                 {categories.map((category) => (
                     <button key={category} onClick={handleCategoryChange(category)} className={`flex-shrink-0 px-6 py-3 text-sm font-medium rounded-lg transition-all text-white ${
@@ -185,7 +185,7 @@ const MatchesPage = () => {
         {activeCategory === 'new' && (
             <div>
                 {newUsers && (
-                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-10 md:px-20' >
+                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-5 md:px-20' >
                         <p className='text-center text-md text-dark_text' >If you and the opposite gender taps the 
                         Thumbs Up icon, then It’s A Match!</p>
                         {newUsers.map((user) => (
@@ -197,8 +197,11 @@ const MatchesPage = () => {
         )}
 
         {activeCategory === 'blocked' && (
-            <div className='flex items-center justify-center mt-20' >
-                <p className='text-center text-md text-dark_text' >Your Blocked Users Will Appear Here</p>
+            <div className='flex items-center flex-col gap-5 justify-center mt-10' >
+                {extractedUser?.gender === 'male' ? <><Image src='/assets/blocked-female.svg' alt='matches' height={100} width={100} />
+                <p className='text-md text-center text-dark_text' >Your blocked users’ profiles will
+                appear here.</p></> : <><Image src='/assets/blocked-male.svg' className='mt-10' alt='matches' height={100} width={100} /><p className='text-md text-center text-dark_text' >Your blocked users’ profiles will
+                appear here.</p></>}
             </div>
         )}
 
@@ -206,10 +209,17 @@ const MatchesPage = () => {
         {activeCategory === 'shortlisted' && (
             <div>
                 {shortlistedUsers && (
-                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-10 md:px-20' >
+                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-5 md:px-20' >
                         {shortlistedUsers.map((user) => (
                             <ShortlistedProfile key={user.id} profile={user} removeFromShortlistedUsers={removeFromShortlistedUsers} />
                         ))}
+                    </div>
+                )}
+                {shortlistedUsers.length === 0 && (
+                    <div className='flex mt-10 flex-col items-center justify-center gap-10' >
+                        {extractedUser?.gender === 'male' ? <><Image src='/assets/shortlisted-female.svg' alt='matches' height={100} width={100} />
+                        <p className='text-md text-center text-dark_text' >Your Shortlisted Profiles Will Appear Here.</p></> : <><Image src='/assets/shortlisted-male.svg' className='mt-10' alt='matches' height={100} width={100} />
+                        <p className='text-md text-center text-dark_text' >Your Shortlisted Profiles Will Appear Here.</p></>}
                     </div>
                 )}
             </div>
@@ -218,7 +228,7 @@ const MatchesPage = () => {
         {activeCategory === 'matches' && (
             <div>
                 {matchedUsers && (
-                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-10 md:px-20' >
+                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-5 md:px-20' >
                         {matchedUsers.map((user) => (
                             <MatchedProfile key={user.id} profile={user} removeFromMatchedUsers={removeFromMatchedUsers} />
                         ))}
@@ -240,7 +250,7 @@ const MatchesPage = () => {
         {activeCategory === `You're Shortlisted By` && (
             <div>
                 {shortlistedBy && (
-                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-10 md:px-20' >
+                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-5 md:px-20' >
                         {shortlistedBy.map((user) => (
                             <ShortlistedByProfile key={user.id} profile={user} removeFromShortlistedByUsers={removeFromShortlistedByUsers} />
                         ))}
@@ -262,7 +272,7 @@ const MatchesPage = () => {
     {activeCategory === `Profile Veiw` && (
             <div>
                 {profileViews && (
-                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-10 md:px-20' >
+                    <div className='mt-10 flex flex-col items-center justify-center gap-5 px-5 md:px-20' >
                         {profileViews.map((user) => (
                             <SearchProfile key={user.id} profile={user} />
                         ))}

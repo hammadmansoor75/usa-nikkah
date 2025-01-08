@@ -34,16 +34,20 @@ const LoginPage = () => {
 const sendOtp = async (formData) => {
   try {
     setOtpSendingLoading(true)
-    setPhone(formData.phone)
+    
+
+    const phoneWithCode = `+92${formData.phone.replace(/^(\+92|92)?/, '')}`;
+    setPhone(phoneWithCode)
 
     const {data, error} = await supabase.auth.signInWithOtp({
-      phone : formData.phone,
+      phone : phoneWithCode,
     })
     if(data){
         setStep(2);
     }
 
   }catch(error){
+    alert("Something went wrong while sending otp. Please try again")
     console.log(error)
   }finally{
     setOtpSendingLoading(false);

@@ -27,11 +27,11 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: "Home", path: "/homepage", icon: <HomeIcon fontSize="large" />, activeIcon : <HomeOutlinedIcon fontSize="large"/>  },
-    { name: "Matches", path: "/matches", icon: <PeopleAltIcon fontSize="large" />, activeIcon : <PeopleOutlinedIcon fontSize="large"/>  },
-    { name: "Interest", path: "/interest", icon: <FavoriteIcon fontSize="large" />, activeIcon : <FavoriteBorderIcon fontSize="large" />  },
-    { name: "Chat", path: "/chat", icon: <ChatIcon fontSize="large" />, activeIcon : <ChatBubbleOutlineOutlinedIcon fontSize="large" />  },
-    { name: "Settings", path: "/account", icon: <SettingsIcon fontSize="large" />, activeIcon : <SettingsOutlinedIcon fontSize="large" />  },
+    { name: "Home", path: "/homepage", icon: <Image src='/assets/home-nav-active.svg' height={24} width={24} alt="home" />, activeIcon : <Image src='/assets/home-nav-active.svg' height={24} width={24} alt="home" />  },
+    { name: "Matches", path: "/matches", icon: <Image src='/assets/matches-nav-active.svg' height={24} width={24} alt="matches" />, activeIcon : <Image src='/assets/matches-nav.svg' height={24} width={24} alt="matches" />  },
+    { name: "Interest", path: "/interest", icon: <FavoriteIcon fontSize="medium" />, activeIcon : <FavoriteBorderIcon fontSize="medium" />  },
+    { name: "Chat", path: "/chat", icon: <Image src='/assets/chat-nav-active.svg' height={24} width={24} alt="chat" />, activeIcon : <Image src='/assets/chat-nav.svg' height={24} width={24} alt="chat" />  },
+    { name: "Settings", path: "/account", icon: <Image src='/assets/settings-nav-active.svg' height={24} width={24} alt="settings" />, activeIcon : <Image src='/assets/settings-nav.svg' height={24} width={24} alt="settings" /> },
   ];
 
   return (
@@ -60,7 +60,7 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Navbar */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-us_red text-white shadow-inner border-t border-gray-700 h-[70px]">
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-us_red text-white shadow-inner border-t border-gray-700 h-[56px]">
         <ul className="flex justify-around items-center py-4">
           {navItems.map((item) => (
             <li key={item.name}>

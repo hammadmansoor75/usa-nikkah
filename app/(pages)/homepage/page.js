@@ -93,29 +93,29 @@ const HomePage = () => {
   }
 
   return (
-    <section className='px-10 md:px-20 py-5 mb-10' >
+    <section className='px-5 md:px-20 pt-3 mb-10 pb-10' >
       <div className='flex items-center justify-between' >
         <div>
           <p className='text-sm text-sub_text_2' >Welcome,</p>
-          <h1 className='text-md text-us_blue font-semibold' >{user?.name}</h1>
+          <h1 className='text-md text-us_blue font-semibold flex items-center justify-center gap-2' >{user?.name}<Link href='/account' ><Image src='/assets/edit.svg' alt='edit' height={12} width={12} /></Link> </h1>
         </div>
         <div className='flex items-start justify-center gap-1'>
           <NotificationsNoneOutlinedIcon />
           {profilePicture && (
             <div className='overflow-hidden rounded-full border-2 border-us_blue w-16 h-16' >
-              <Image className="object-cover w-full h-full" src={profilePicture} alt="profile" height={50} width={50} />
+              <Link href='/account/view-profile' ><Image className="object-cover w-full h-full" src={profilePicture} alt="profile" height={50} width={50} /></Link>
             </div>
           )}
         </div>
       </div>
 
-      <div className='flex items-center gap-10 justify-between mt-5'>
-        <button className='blue-button' >UPGRADE</button>
-        <button onClick={handleSearch} className='red-button flex items-center justify-center gap-2'><SearchOutlinedIcon/> Search</button>
+      <div className='flex items-center gap-10 justify-between mt-3'>
+        <button className='home-blue-btn flex items-center justify-center' >UPGRADE</button>
+        <button onClick={handleSearch} className='home-red-btn flex items-center justify-center gap-2'><SearchOutlinedIcon fontSize="medium" /> Search</button>
       </div>
 
 
-      <div className="relative min-h-[200px] w-full mt-10">
+      <div className="relative min-h-[170px] w-full mt-5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#BF0D3E] to-[#041E42] opacity-80 rounded-lg">
           <div className="grid grid-cols-2 grid-rows-2 h-full w-full p-4">
             {/* <!-- Section 1 --> */}
@@ -142,7 +142,7 @@ const HomePage = () => {
         </div>
       </div>
 
-          <h1 className='text-dark_text text-lg font-medium mt-10' >{`It's a Match`}</h1>
+          <h1 className='text-us_blue text-lg font-semibold mt-10' >{`It's A Match!`}</h1>
 
       <div className='mt-2 ' >
       <div className='flex items-center justify-start gap-5 flex-wrap overflow-hidden' >
@@ -150,7 +150,7 @@ const HomePage = () => {
             <HomeMatchedUser key={user.id} userProfile={user} ></HomeMatchedUser>
           ))}
 
-          {matchedUsers && (
+          {matchedUsers && matchedUsers.length > 0 && (
             <Link className='flex items-center justify-center flex-col' href='/matches' >
             <ArrowForwardIcon className='text-us_blue' fontSize='large' />
             <p className='text-us_blue text-md' >See All</p>
@@ -166,14 +166,14 @@ const HomePage = () => {
           )}
       </div>
 
-      <h1 className='text-dark_text text-lg font-medium mt-10' >{`New Matches`}</h1>
+      <h1 className='text-us_blue text-lg font-semibold mt-10' >{`New Matches`}</h1>
       <div className='mt-5' >
         <div className='flex items-center justify-start gap-5 flex-wrap overflow-hidden' >
           {shortlistedUsers && shortlistedUsers.map((user) => (
             <HomeNewUser key={user.id} userProfile={user} ></HomeNewUser>
           ))}
 
-          {shortlistedUsers && (
+          {shortlistedUsers && shortlistedUsers.length > 0 && (
             <Link className='flex items-center justify-center flex-col' href='/matches' >
             <ArrowForwardIcon className='text-us_blue' fontSize='large' />
             <p className='text-us_blue text-md' >See All</p>

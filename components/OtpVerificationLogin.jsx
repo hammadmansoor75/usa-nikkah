@@ -44,14 +44,15 @@ const OtpVerificationLogin = ({phone}) => {
         setOtp('');
         setTimer(60);
         setIsTimerActive(true);
+        const phoneWithCode = `+1${formData.phone.replace(/^(\+1|1)?/, '')}`;
         const { data, error } = await supabase.auth.signInWithOtp({
-            phone: phone,
+            phone: phoneWithCode,
         })
     }
 
     const handleSubmit = async () => {
         if(otp.length === 6){
-            const { data, error } = await supabase.auth.verifyOtp({ phone, token:otp, type: 'sms'})
+            const { data , error } = await supabase.auth.verifyOtp({ phone, token:otp, type: 'sms'});
             if(data){
                 const response = await axios.post('/api/user/verify-login', {
                     supabaseAuthId : data.user.id
@@ -59,15 +60,15 @@ const OtpVerificationLogin = ({phone}) => {
 
                 if(response.status === 200){
                     const user = response.data
-
                     router.push('/homepage')
                 }
 
                 else{
+                    alert("No Account Exists! Create One!")
                     console.log("USER NOT FOUND IN DB")
                 }
-            }
-            if(error){
+            }else{
+                alert("OTP Incorrect")
                 console.log(error)
             }
         }

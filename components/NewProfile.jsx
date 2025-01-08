@@ -112,21 +112,25 @@ const NewProfile = ({profile, removeFromNewUsers}) => {
                     <Image onClick={handleProfileView} className='object-cover w-full h-full' src={profilePhoto} alt='profile' width={100} height={100}/>
                 )}
             </div>
-            <div>
-                <h3 className='text-sm text-us_blue font-medium' >{profile.name}</h3>
-                <p className='text-xs text-dark_text' >{calculateAge(profile.dob)} , {maritalStatus}</p>
-                <p className='text-xs text-dark_text' >{profile.city} , {profile.state}</p>
-                <div className='flex items-center justify-center gap-2 mt-2' >
+            <div className='flex items-start justify-start flex-col' >
+                <div className='flex items-start justify-between gap-10' >
+                    <div>
+                        <h3 className='text-sm text-us_blue font-medium' >{profile.name}</h3>
+                        <p className='text-xs text-dark_text' >{calculateAge(profile.dob)} , {maritalStatus}</p>
+                        <p className='text-xs text-dark_text' >{profile.city} , {profile.state}</p>
+                    </div>
+                    <div className='' >
+                        <p className='text-green-500' >{randomNumber}%</p>
+                    </div>
+                </div>
+                <div className='flex items-center justify-center gap-4 mt-4' >
                     <button onClick={toggleThumbsUpOpen} className='bg-us_blue flex items-center justify-between gap-2 text-white px-4 py-2 text-sm rounded-lg cursor-pointer' ><ThumbUpAltRoundedIcon /></button>
                     <button onClick={toggleThumbsDownOpen} className='bg-us_blue px-4 py-2 rounded-lg flex items-center cursor-pointer justify-center' >
                         <ThumbDownRoundedIcon className='text-white' />
                     </button>
                 </div>
             </div>
-            <div className='flex flex-col items-start justify-start gap-9' >
-                <p className='text-green-500' >{randomNumber}%</p>
-                
-            </div>
+            
         </div>
 
         {thumbsUpOpen && (

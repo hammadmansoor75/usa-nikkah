@@ -74,6 +74,7 @@ const PhotoUploadPage = () => {
     setProfilePhotoLoading(true);
     const file = e.target.files[0];
     if(!file){
+      alert("No Image Selected!")
       console.log("No File Selected")
       return;
     }
@@ -90,6 +91,7 @@ const PhotoUploadPage = () => {
 
       if (!response.ok){
         const errorData = await response.json();
+        alert("Something Went wrong while uploading. Please Try Again")
         console.error("Cloudinary Error:", errorData);
         throw new Error("Failed to upload");
       };
@@ -97,9 +99,11 @@ const PhotoUploadPage = () => {
       setProfilePhotoUploadUrl(data.secure_url);
       setProfilePhotoUploadStatus(true);
       console.log(profilePhotoUploadUrl)
+      alert("Profile Photo Uploaded. Dont Leave this page before uploading a selfie otherwise images will be lost")
     } catch (error) {
       console.error(error)
       console.error('Upload failed:', error.message);
+      alert("Upload Failed. Please Try Again!")
     } finally {
       setProfilePhotoLoading(false);
     }
@@ -119,6 +123,7 @@ const PhotoUploadPage = () => {
     setPhotoLoading(true)
     const file = e.target.files[0];
     if(!file){
+      alert("NO Image Selected!")
       console.log("No File Selected!")
       return;
     }
@@ -139,11 +144,14 @@ const PhotoUploadPage = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Cloudinary Error:", errorData);
+        alert("Something went wrong while uploading the photo")
         throw new Error("Failed to upload");
       }
       const data = await response.json();
       setUploadedPhotos((prevPhotos) => [...prevPhotos, data.secure_url]);
+      alert("Photo Uploaded. Dont Leave this page before uploading a selfie otherwise images will be lost")
     } catch (error) {
+      alert("Upload Failed! Please Try Again")
       console.error("Upload failed:", error.message);
     } finally {
       setPhotoLoading(false);
@@ -163,6 +171,7 @@ const PhotoUploadPage = () => {
       videoRef.current.play();
       
     } catch (error) {
+      alert("Failed to access camera")
       console.error("Failed to access camera:", error);
     }
   }
@@ -219,6 +228,7 @@ const PhotoUploadPage = () => {
       alert("Selfie uploaded successfully!");
       
     } catch (error) {
+      alert("Upload Failed! Please Try Again")
       console.error("Upload failed:", error.message);
     }
   }

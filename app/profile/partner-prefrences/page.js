@@ -96,7 +96,7 @@ const PartnerPrefrencesPage = () => {
                 console.log(response.data)
                 setPartnerPrefrences(response.data);
             } else {
-                console.error('Error fetching partner preferences:', response.error);
+                console.log('Error fetching partner preferences:', response.error);
             }
         }
         extractUser();

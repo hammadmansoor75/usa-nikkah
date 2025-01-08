@@ -111,7 +111,7 @@ const ShortlistedProfile = ({profile, removeFromShortlistedUsers}) => {
                 )}
             </div>
             <div className='w-2/3' >
-                <div className='flex items-center justify-between' >
+                <div className='flex items-start justify-between' >
                     <div>
                         <h3 className='text-sm text-us_blue font-medium' >{profile.name}</h3>
                         <p className='text-xs text-dark_text' >{calculateAge(profile.dob)} , {maritalStatus}</p>
@@ -121,7 +121,7 @@ const ShortlistedProfile = ({profile, removeFromShortlistedUsers}) => {
                         <p className='text-green-500' >{randomNumber}%</p>
                     </div>
                 </div>
-                <div className='flex items-center justify-center gap-2 mt-2' >
+                <div className='flex items-center justify-center gap-4 mt-4' >
                     <button className='bg-us_blue flex items-center justify-between gap-2 text-white px-2 py-1 text-sm rounded-lg cursor-pointer' ><CancelIcon /></button>
                     <button onClick={toggleThumbsDownOpen} className='bg-us_blue px-2 py-1 rounded-lg flex items-center cursor-pointer justify-center' >
                         <ThumbDownRoundedIcon className='text-white' />

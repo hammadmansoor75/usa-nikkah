@@ -9,7 +9,7 @@ export async function POST(req){
             ethnicBackground, occupation, hobbies, education, userId
           } = await req.json();
 
-          if (!aboutMe || !height || !maritalStatus || !children || !childrenLiving || !moreKids ||
+          if (!aboutMe || !height || !maritalStatus || !children || !moreKids ||
             !ethnicBackground || !occupation || !hobbies || !education || !userId) {
           return NextResponse.json({error : "All Fields are required"}, {status : 400});
         }
@@ -21,7 +21,7 @@ export async function POST(req){
               height,
               maritalStatus,
               children,
-              childrenLiving,
+              childrenLiving : childrenLiving || "N/A",
               moreKids,
               ethnicBackground,
               occupation,
@@ -78,7 +78,7 @@ export async function GET(req) {
       } = await req.json();
   
       // Validate fields
-      if (!aboutMe || !height || !maritalStatus || !children || !childrenLiving || !moreKids ||
+      if (!aboutMe || !height || !maritalStatus || !children || !moreKids ||
         !ethnicBackground || !occupation || !hobbies || !education || !userId) {
         return NextResponse.json({ error: "All Fields are required" }, { status: 400 });
       }
@@ -91,7 +91,7 @@ export async function GET(req) {
           height,
           maritalStatus,
           children,
-          childrenLiving,
+          childrenLiving : childrenLiving || "N/A",
           moreKids,
           ethnicBackground,
           occupation,

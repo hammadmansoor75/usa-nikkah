@@ -37,9 +37,15 @@ export const signupFormSchema = z.object({
     .refine((val) => US_STATES.includes(val), { message: "Invalid state" }),
   gender: z.enum(["male", "female"], { message: "Gender is required" }),
   dob: z
-    .string()
-    .nonempty({ message: "Date of Birth is required" })
-    .refine((val) => !isNaN(new Date(val).getTime()), { message: "Invalid Date" }),
+  .string()
+  .nonempty({ message: "Date of Birth is required" })
+  .refine((val) => {
+    const dob = new Date(val);
+    const age = new Date().getFullYear() - dob.getFullYear();
+    const isOldEnough =
+      age > 18 || (age === 18 && new Date().getTime() >= dob.setFullYear(dob.getFullYear() + 18));
+    return isOldEnough;
+  }, { message: "You must be at least 18 years old" }),
   profileCreatedBy: z
     .string()
     .nonempty({ message: "Profile Created By is required" }),
@@ -75,17 +81,32 @@ const SignupPage = () => {
     const sendOtp = async (formData) => {
         try{
             setOtpSendingLoading(true);
-            setPhone(formData.phone)
+            
+            
+            const phoneWithCode = `+1${formData.phone.replace(/^(\+1|1)?/, '')}`;
+            setPhone(phoneWithCode)
+            const signupFormData = {
+                fullName : formData.fullName,
+                email : formData.email,
+                phone : phoneWithCode,
+                city : formData.city,
+                state : formData.state,
+                gender : formData.gender,
+                dob : formData.dob,
+                profileCreatedBy : formData.profileCreatedBy
+
+            } 
             setSignupData(formData);
 
             const {data, error} = await supabase.auth.signInWithOtp({
-                phone : formData.phone,
+                phone : phoneWithCode,
             })
             if(data){
                 setStep(2);
             }
         }catch(error){
             console.log(error);
+            alert("Otp sending failed. Try Again")
         }finally{
             setOtpSendingLoading(false);
         }

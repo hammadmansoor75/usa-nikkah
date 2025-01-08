@@ -20,6 +20,14 @@ export async function POST(req) {
       profileCreatedBy,
     } = await req.json()
 
+    const existingUser = await prisma.user.findUnique({
+      where : {phone : phone}
+    })
+
+    if(existingUser){
+      return NextResponse.json({error : "User already exists"}, {status : 200});
+    }
+
     // Create user in the database using Prisma
     const user = await prisma.user.create({
       data: {
