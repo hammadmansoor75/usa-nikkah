@@ -5,15 +5,20 @@ import NewProfile from '@/components/NewProfile';
 import SearchProfile from '@/components/SearchProfile';
 import ShortlistedByProfile from '@/components/ShortlistedByProfile';
 import ShortlistedProfile from '@/components/ShortlistedProfile';
+import { useAlert } from '@/context/AlertContext';
 import axios from 'axios';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { redirect, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
+import { ClipLoader } from 'react-spinners';
 
 const MatchesPage = () => {
     const [activeCategory, setActiveCategory] = useState("matches") 
-    const categories = ["matches" , "new" , "shortlisted", "blocked", "Profile Veiw", "You're Shortlisted By"];
+    const categories = ["matches" , "new" , "shortlisted", "blocked", "Profile View", "You're Shortlisted By"];
 
+    const { data: session, status } = useSession();
     const [extractedUser, setExtractedUser] = useState();
 
     const [newUsers, setNewUsers] = useState([]);
@@ -26,37 +31,23 @@ const MatchesPage = () => {
     const [shortlistedBy, setShortlistedBy] = useState([]);
 
     const [profileViews,setProfileViews] = useState([])
+    const router = useRouter();
+
+    const {showAlert} = useAlert();
     
 
     useEffect(() => {
-        async function extractUser() {
-          const response = await fetch('/api/user/extract-user', {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-          });
-        
-          if (response.ok) {
-            const data = await response.json();
-            const responseUser = await axios.get(`/api/user/create-user?userId=${data.id}`)
-            if(responseUser.status === 200){
-              setExtractedUser(responseUser.data);
-              console.log(responseUser.data)
-              getMatchedUsers(data.id);
-          }
-            
-          } else {
-            console.error('Error:', await response.json());
-          }
+        if(status === 'authenticated' && session){
+            getMatchedUsers(session.user.id);
         }
-        extractUser();
         
-      },[]);
+      },[status,session]);
 
 
       const getNewUsers = async () => {
         try {
             setNewUsersLoading(true)
-            const response = await axios.get(`/api/matching/new-users?userId=${extractedUser.id}`);
+            const response = await axios.get(`/api/matching/new-users?userId=${session.user.id}`);
             console.log("NEW USERS: ", response.data.newUsers );
             setNewUsers(response.data.newUsers)
 
@@ -73,7 +64,7 @@ const MatchesPage = () => {
 
     const getShortlistedUsers = async () => {
         try {
-            const response = await axios.get(`/api/matching/shortlisted?userId=${extractedUser.id}`);
+            const response = await axios.get(`/api/matching/shortlisted?userId=${session.user.id}`);
             console.log("SHORTLISTED USERS: ", response.data.shortlistedUsers );
             setShortlistedUsers(response.data.shortlistedUsers)
 
@@ -107,9 +98,9 @@ const MatchesPage = () => {
 
     const getShortlistedByUsers = async () => {
         try {
-            const response = await axios.get(`/api/matching/shortlisted-by?userId=${extractedUser.id}`);
+            const response = await axios.get(`/api/matching/shortlisted-by?userId=${session.user.id}`);
             console.log("SHORTLISTED BY USERS: ", response.data.shortlistedBy );
-            setProfileViews(response.data.shortlistedBy)
+            setShortlistedBy(response.data.shortlistedBy)
 
         } catch (error) {
             console.log("SHORTLISTED BY USERS ERROR:",error);
@@ -125,7 +116,7 @@ const MatchesPage = () => {
 
     const getProfileViews = async () => {
         try {
-            const response = await axios.get(`/api/matching/profile-view?userId=${extractedUser.id}`);
+            const response = await axios.get(`/api/matching/profile-view?userId=${session.user.id}`);
             console.log("PROFILE VIEWS: ", response.data.viewUsers );
             setProfileViews(response.data.viewUsers)
 
@@ -150,16 +141,27 @@ const MatchesPage = () => {
             getShortlistedUsers();
         } else if (category === `You're Shortlisted By`){
             getShortlistedByUsers();
-        } else if(category === 'Profile Veiw'){
+        } else if(category === 'Profile View'){
             getProfileViews();
         }
     }
 
+    if (status === "loading") {
+        return (
+          <div className="flex items-center justify-center">
+            <ClipLoader size={50} />
+          </div>
+        );
+      }
+    
+      if (!session) {
+        router.push("/auth");
+      }
 
   return (
     <section className='mb-10 pb-10' >
         <div className='flex md:hidden' >
-            <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+            <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
                 <Link href='/homepage' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
                 <div className='w-full' >
                     <h1 className='text-center text-us_blue text-xl font-semibold' >Matches</h1>
@@ -189,7 +191,7 @@ const MatchesPage = () => {
                         <p className='text-center text-md text-dark_text' >If you and the opposite gender taps the 
                         Thumbs Up icon, then It’s A Match!</p>
                         {newUsers.map((user) => (
-                            <NewProfile key={user.id} profile={user} removeFromNewUsers={removeFromNewUsers} />
+                            <NewProfile key={user.id} profile={user} getMatchedUsers = {getMatchedUsers}  removeFromNewUsers={removeFromNewUsers} />
                         ))}
                     </div>
                 )}
@@ -211,7 +213,7 @@ const MatchesPage = () => {
                 {shortlistedUsers && (
                     <div className='mt-10 flex flex-col items-center justify-center gap-5 px-5 md:px-20' >
                         {shortlistedUsers.map((user) => (
-                            <ShortlistedProfile key={user.id} profile={user} removeFromShortlistedUsers={removeFromShortlistedUsers} />
+                            <ShortlistedProfile key={user.id} getMatchedUsers={getMatchedUsers} profile={user} removeFromShortlistedUsers={removeFromShortlistedUsers} />
                         ))}
                     </div>
                 )}
@@ -269,7 +271,7 @@ const MatchesPage = () => {
         )}
 
 
-    {activeCategory === `Profile Veiw` && (
+    {activeCategory === `Profile View` && (
             <div>
                 {profileViews && (
                     <div className='mt-10 flex flex-col items-center justify-center gap-5 px-5 md:px-20' >

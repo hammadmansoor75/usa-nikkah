@@ -16,6 +16,10 @@ import LocationCityIcon from '@mui/icons-material/LocationCity';
 import { supabase } from "@/utils/supabaseClient";
 import OtpVerification from "@/components/OtpVerification";
 import { useSignupContext } from "@/providers/AccountProvider";
+import axios from "axios";
+import { redirect, useRouter } from "next/navigation";
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import { signIn } from "next-auth/react";
 
 export const signupFormSchema = z.object({
   fullName: z
@@ -26,10 +30,7 @@ export const signupFormSchema = z.object({
     .string()
     .email({ message: "Invalid email address" })
     .nonempty({ message: "Email is required" }),
-  phone: z
-    .string()
-    .nonempty({ message: "Phone number is required" })
-    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number format" }),
+  password : z.string().min(8, {message : "Password must be atleast 8 characters"}),
   city: z.string().nonempty({ message: "City is required" }),
   state: z
     .string()
@@ -64,10 +65,11 @@ const US_STATES = [
  
 
 const SignupPage = () => {
-    const [step,setStep] = useState(1);
-    const [otpSendingLoading, setOtpSendingLoading] = useState(false);
-    const [phone,setPhone] = useState('');
-    const {setSignupData} = useSignupContext();
+
+    const [errorMessage, setErrorMessage] = useState("")
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    
     const {
         register,
         handleSubmit,
@@ -78,53 +80,54 @@ const SignupPage = () => {
         resolver: zodResolver(signupFormSchema),
     });
 
-    const sendOtp = async (formData) => {
-        try{
-            setOtpSendingLoading(true);
-            
-            
-            const phoneWithCode = `+1${formData.phone.replace(/^(\+1|1)?/, '')}`;
-            setPhone(phoneWithCode)
-            const signupFormData = {
-                fullName : formData.fullName,
+
+
+    const onSubmit = async (formData) => {
+        try {
+            setLoading(true);
+            const response = await axios.post("/api/user/create-user", {
+                name : formData.fullName,
                 email : formData.email,
-                phone : phoneWithCode,
-                city : formData.city,
+                password : formData.password,
                 state : formData.state,
-                gender : formData.gender,
+                city : formData.city,
                 dob : formData.dob,
+                gender : formData.gender,
                 profileCreatedBy : formData.profileCreatedBy
-
-            } 
-            setSignupData(formData);
-
-            const {data, error} = await supabase.auth.signInWithOtp({
-                phone : phoneWithCode,
             })
-            if(data){
-                setStep(2);
+    
+            
+            if(response.data.error){
+                setErrorMessage(response.data.error);
+            }else{
+                const signInResponse = await signIn("credentials", {
+                      redirect : false,
+                      email : formData.email,
+                      password : formData.password
+                });
+                router.push('/profile/personal-details')
             }
-        }catch(error){
+        } catch (error) {
             console.log(error);
-            alert("Otp sending failed. Try Again")
         }finally{
-            setOtpSendingLoading(false);
+            setLoading(false)
         }
-    } 
+    }
 
+    
 
   return (
     <main>
-        {step === 1 && (
+        
             <section>
-                <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+                <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
                     <Link href='/auth' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
                     <div className='w-full' >
                         <h1 className='text-center text-xl font-medium' >Sign Up</h1>
                     </div>
                 </div>
                 <div className="flex items-center justify-center mt-10" >
-                    <form onSubmit={handleSubmit(sendOtp)} className="px-10 md:px-20"  >
+                    <form onSubmit={handleSubmit(onSubmit)} className="px-10 md:px-20"  >
                         <div className="input flex items-center justify-center gap-2" >
                             <PersonIcon className="text-sub_text_2"  />
                             <input {...register("fullName")} placeholder="Full Name" className="w-full" />                            
@@ -132,17 +135,19 @@ const SignupPage = () => {
                         {errors.fullName && <p className="text-red-500 text-sm mt-2" >{errors.fullName.message}</p>}
 
                         <div className="input flex items-center justify-center gap-2 mt-3" >
-                            <PhoneAndroidIcon className="text-sub_text_2"  />
-                            <input {...register("phone")} placeholder="Mobile Number" className="w-full"  />
-                           
-                        </div>
-                        {errors.phone && <p className="text-red-500 text-sm mt-2" >{errors.phone.message}</p>}
-                        <div className="input flex items-center justify-center gap-2 mt-3" >
                             <MailLockIcon className="text-sub_text_2"  />
                             <input {...register("email")} placeholder="Email" className="w-full"  />
                             
                         </div>
                         {errors.email && <p className="text-red-500 text-sm mt-2" >{errors.email.message}</p>}
+
+                        <div className="input flex items-center justify-center gap-2 mt-3" >
+                            <LockOpenIcon className="text-sub_text_2"  />
+                            <input {...register("password")} placeholder="Password" className="w-full"  />
+                           
+                        </div>
+                        {errors.password && <p className="text-red-500 text-sm mt-2" >{errors.password.message}</p>}
+                        
                         <div className="input flex items-center justify-center gap-2 mt-3" >
                             <LocationCityIcon className="text-sub_text_2"  />
                             <input {...register("city")} placeholder="City" className="w-full"  />
@@ -151,7 +156,7 @@ const SignupPage = () => {
 
                         <div className="mt-4" >
                             <Select onValueChange={(value) => setValue("state", value)} >
-                                <SelectTrigger>
+                                <SelectTrigger className="w-[300px] h-[50px] rounded-[10px]" >
                                     <SelectValue placeholder="Select a state" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -187,9 +192,9 @@ const SignupPage = () => {
 
                         <div className="mt-5" >
                             <label className="text-sub_text_2 text-sm mb-4">Profile Created By</label>
-                            <Select onValueChange={(value) => setValue("profileCreatedBy", value)} >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select an option" />
+                            <Select className="" onValueChange={(value) => setValue("profileCreatedBy", value)} >
+                                <SelectTrigger className="w-[300px] h-[50px] rounded-[10px]" >
+                                    <SelectValue className="text-sub_text_2" placeholder="Select an option" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="self">Self</SelectItem>
@@ -203,7 +208,8 @@ const SignupPage = () => {
                             {errors.profileCreatedBy && <p className="text-red-500 mt-2 text-sm">{errors.profileCreatedBy.message}</p>}
                         </div>
 
-                        <div className="flex items-center justify-center" ><button type="submit" className="blue-button mt-5" >SIGN UP</button></div>
+                        {errorMessage && <p className="text-red-500 mt-2 text-lg text-center" >{errorMessage}</p>}
+                        <div className="flex items-center justify-center" ><button type="submit" className="blue-button mt-5" >{loading ? "SIGNING YOU UP" : "SIGN UP"}</button></div>
 
                         <p className="text-center mt-5 text-sm text-dark_text" >Your contact details will not be visible to other members and will remain private. </p>
 
@@ -213,11 +219,6 @@ const SignupPage = () => {
 
                 </div>
             </section>
-        )}
-
-        {step === 2 && (
-            <OtpVerification phone={phone} />
-        )}
     </main>
   )
 }

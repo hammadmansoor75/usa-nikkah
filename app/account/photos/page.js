@@ -6,9 +6,14 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useAlert } from '@/context/AlertContext';
 
 const PhotosPage = () => {
+
+  const {data : session, status} = useSession();
+
   const [user, setUser] = useState(null);
   const [photos, setPhotos] = useState();
 
@@ -19,22 +24,11 @@ const PhotosPage = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const router = useRouter();
+  const {showAlert} = useAlert();
   
   useEffect(() => {
-    async function fetchUser() {
-      const response = await fetch('/api/user/extract-user', {
-          method: 'GET',
-          credentials: 'include',
-      });
-
-      if (response.ok) {
-          const data = await response.json();
-          setUser(data);
-          fetchImages(data.id);
-      } else {
-          console.error('Error:', await response.json());
-      }
-  }
+    
+  
 
   async function fetchImages(userId) {
     const response = await axios.get(`/api/user/photos?userId=${userId}`)
@@ -48,15 +42,18 @@ const PhotosPage = () => {
     }
 }
 
-  fetchUser();
-  }, []);
+if(status === 'authenticated' && session){
+  fetchImages(session.user.id)
+}
+
+  }, [status, session]);
 
 
   const handlePhotoClick = () => {
     if(uploadedPhotos.length < 6 ){
       addPhotoRef.current.click();
     }else{
-      alert("You can upload a maximum of 6 photos")
+      showAlert("You can upload a maximum of 6 photos")
     }
   }
 
@@ -88,7 +85,8 @@ const PhotosPage = () => {
         throw new Error("Failed to upload");
       }
       const data = await response.json();
-      setUploadedPhotos((prevPhotos) => [...prevPhotos, data.secure_url]);
+      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,w_400,h_400/");
+      setUploadedPhotos((prevPhotos) => [...prevPhotos, faceCroppedURL]);
     } catch (error) {
       console.error("Upload failed:", error.message);
     } finally {
@@ -101,23 +99,33 @@ const PhotosPage = () => {
       setSubmitLoading(true);
       const response = await axios.put('/api/user/photos', {
         photos: uploadedPhotos,
-        userId: user.id
+        userId: session.user.id
       })
       if(response.status === 200){
         router.push('/account');
       }else{
-        alert("Something went wrong! Please Try Again")
+        showAlert("Something went wrong! Please Try Again")
       }
     } catch (error) {
       console.error("Error Updating Photos:", error);
-      alert("Something went wrong! Please Try Again")
+      showAlert("Something went wrong! Please Try Again")
     } finally {
       setSubmitLoading(false);
     }
   }
+
+   if(status === 'loading'){
+      return <div className='flex items-center justify-center' >
+          <ClipLoader size={50} />
+      </div>
+  }
+  
+  if(!session){
+      router.push('/auth')
+  }
   return (
     <section className='mb-10' >
-      <div className="bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full">
+      <div className="bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full">
         <Link href="/account">
           <Image src="/assets/back-icon.svg" alt="backIcon" height={30} width={30} />
         </Link>
@@ -179,6 +187,17 @@ const PhotosPage = () => {
         </div>
 
       </div>
+
+
+      {photos?.adminVerificationStatus === false && (
+        <div className='fixed inset-0 bg-us_blue bg-opacity-50 w-full' >
+          <div className='fixed top-1/2 h-[400px] rounded-t-3xl py-10 px-5 bg-white w-full' >
+          <h1 className='text-xl font-semibold text-us_blue text-center' >Verification In Progress </h1>
+          <p className='text-md text-sub_text_2 mt-5' >Your profile was created successfully. Our staff will verify your account and activate it if your selfie verification passed.</p>
+          <p className='text-md text-sub_text_2 mt-5' >You will receive a notification when your profile is activated. Thank you for your patience. In the meantime, if you feel you need to correct any information, you can do so now.</p>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

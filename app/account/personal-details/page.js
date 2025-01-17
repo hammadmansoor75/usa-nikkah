@@ -4,76 +4,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import axios, { Axios } from 'axios';
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import React, { useEffect } from 'react'
 import { useState } from 'react';
 import * as z from 'zod'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from 'next-auth/react';
+import { ClipLoader } from 'react-spinners';
+import { useAlert } from '@/context/AlertContext';
 
-const heights = [
-  "Below 4ft",
-  "4ft",
-  "4ft 1in",
-  "4ft 2in",
-  "4ft 3in",
-  "4ft 4in",
-  "4ft 5in",
-  "4ft 6in",
-  "4ft 7in",
-  "4ft 8in",
-  "4ft 9in",
-  "4ft 10in",
-  "4ft 11in",
-  "5ft",
-  "5ft 1in",
-  "5ft 2in",
-  "5ft 3in",
-  "5ft 4in",
-  "5ft 5in",
-  "5ft 6in",
-  "5ft 7in",
-  "5ft 8in",
-  "5ft 9in",
-  "5ft 10in",
-  "5ft 11in",
-  "6ft",
-  "6ft 1in",
-  "6ft 2in",
-  "6ft 3in",
-  "Above 6ft 3in"
-];
-
-const personalDetailsScehma = z.object({
-    aboutMe: z.string().nonempty({ message: "About Me is required" }).refine((value) => {
-        // Banned words
-        const bannedWords = ["aol", "gmail", "yahoo", "live", "msn", "fb", "instagram", "tiktok"];
-        const containsBannedWords = bannedWords.some((word) => value.toLowerCase().includes(word));
-    
-        // Check for numbers, @, or banned words
-        const containsNumbersOrSpecialChars = /[0-9@]/.test(value);
-    
-        return !containsBannedWords && !containsNumbersOrSpecialChars;
-    }, {
-        message: "About Me must not include numbers, email addresses, '@', or banned words like AOL, Gmail, etc.",
-    }),
-    height : z.string().nonempty({ message: "Height is required" }),
-    maritalStatus : z.string().nonempty({ message: "Marital Status is required" }),
-    children : z.string().nonempty({ message: "No of Children is required" }),
-    childrenLiving : z.string().optional(),
-    moreKids : z.string().nonempty({ message: "Want More Kids is required" }),
-    ethnicBackground : z.string().nonempty({ message: "Ethnic Background is required" }),
-    occupation : z.string().nonempty({ message: "Occupation is required" }).refine((value) => /^[A-Za-z\s]+$/.test(value), {
-        message: "Occupation must only contain letters and spaces",
-      }),
-    hobbies : z.string().nonempty({ message: "Hobbies is required" }),
-    education : z.string().nonempty({message : "Education is required"})
-})
+ 
 
 const PersonalDetailsPage = () => {
 
+    const {data : session, status} = useSession();
     const [detailedUser, setDetailedUser] = useState(null)
     const router = useRouter();
+    const {showAlert} = useAlert();
 
     const {
       register,
@@ -87,46 +35,31 @@ const PersonalDetailsPage = () => {
     
   
     useEffect(() => {
-      async function extractUser() {
-        const response = await fetch('/api/user/extract-user', {
-          method: 'GET',
-          credentials: 'include', // Include cookies in the request
-        });
-      
-        if (response.ok) {
-          const data = await response.json();
-          const userId = data.id
-          const responseUser = await axios.get(`/api/user/add-personal-details?userId=${userId}`)
-          if(responseUser.status === 200){
+      async function getPersonalDetails() {
+        const responseUser = await axios.get(`/api/user/add-personal-details?userId=${session.user.id}`)
+        if(responseUser.status === 200){
             setDetailedUser(responseUser.data);
-            
-            console.log(responseUser.data)
-        }else{
-            console.error('Error:', await responseUser.json());
-        }
-          
-        } else {
-          console.error('Error:', await response.json());
+            const data = responseUser.data
+            setValue("aboutMe", data.aboutMe || "");
+            setValue("height", data.height || "");
+            setValue("maritalStatus", data.maritalStatus || "");
+            setValue("children", data.children || "");
+            setValue("childrenLiving", data.childrenLiving || "");
+            setValue("moreKids", data.moreKids || "");
+            setValue("ethnicBackground", data.ethnicBackground || "");
+            setValue("education", data.education || "");
+            setValue("occupation", data.occupation || "");
+            setValue("hobbies", data.hobbies || "");
         }
       }
-      extractUser();
-    },[])
+
+      if(status === 'authenticated' && session){
+        getPersonalDetails();
+      }
 
 
- useEffect(() => {
-         if (detailedUser) {
-          setValue("aboutMe", detailedUser.aboutMe || "");
-          setValue("height", detailedUser.height || "");
-          setValue("maritalStatus", detailedUser.maritalStatus || "");
-          setValue("children", detailedUser.children || "");
-          setValue("childrenLiving", detailedUser.childrenLiving || "");
-          setValue("moreKids", detailedUser.moreKids || "");
-          setValue("ethnicBackground", detailedUser.ethnicBackground || "");
-          setValue("education", detailedUser.education || "");
-          setValue("occupation", detailedUser.occupation || "");
-          setValue("hobbies", detailedUser.hobbies || "");
-         }
-  }, [detailedUser, setValue]);
+    },[setValue,status,session])
+
   
 
   const onSubmit = async (data) => {
@@ -145,16 +78,26 @@ const PersonalDetailsPage = () => {
     })
 
     if(response.status === 200){
-      alert('Personal Details Updated!');
+      showAlert('Personal Details Updated!');
       router.push('/account');
     }else{
-      alert("Something went wrong")
+      showAlert("Something went wrong")
     }
   }
 
+  if(status === 'loading'){
+    return <div className='flex items-center justify-center' >
+        <ClipLoader size={50} />
+    </div>
+}
+
+if(!session){
+    router.push('/auth')
+}
+
   return (
     <main className='mb-10' >
-      <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+      <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
         <Link href='/account' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
         <div className='w-full' >
           <h1 className='text-center text-xl font-medium' >Personal Details</h1>
@@ -163,16 +106,16 @@ const PersonalDetailsPage = () => {
 
       <div className='mt-5' >
             <div className='flex items-center justify-center mt-5' >
-                <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20' >
+                <form onSubmit={handleSubmit(onSubmit)} className='px-5 md:px-20' >
                     <div className='flex flex-col items-start justify-start' >
                         <label className='text-sub_text_2 text-sm' >About Me: No Contact Details Allowed</label>
-                        <textarea className='w-[295px] h-[82px] rounded-md border border-light_gray p-2 mt-2'  {...register("aboutMe")}  />
+                        <textarea className='w-[322px] h-[82px] rounded-md border border-light_gray p-2 mt-2'  {...register("aboutMe")}  />
                         {errors.aboutMe && <p className="text-red-500 mt-2 text-sm">{errors.aboutMe.message}</p>}
                     </div>
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Height</label>
                         <Select onValueChange={(value) => setValue("height", value)} value={watch("height")} >
-                            <SelectTrigger>
+                            <SelectTrigger className="h-[40px]" >
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -288,7 +231,7 @@ const PersonalDetailsPage = () => {
                     
                     <div className='mt-3' >
                         <label className="text-sub_text_2 text-sm">Occupation</label>
-                        <div className="input flex items-center justify-center gap-2 mt-1" >
+                        <div className="custom-input flex items-center justify-center gap-2 mt-1" >
                             
                             <input {...register("occupation")} placeholder="" className="w-full"  />
                         </div>
@@ -297,7 +240,7 @@ const PersonalDetailsPage = () => {
 
                     <div className='mt-3' >
                         <label className="text-sub_text_2 text-sm">Hobbies</label>
-                        <div className="input flex items-center justify-center gap-2 mt-1" >
+                        <div className="custom-input flex items-center justify-center gap-2 mt-1" >
                             
                             <input {...register("hobbies")} placeholder="" className="w-full"  />
                         </div>

@@ -1,131 +1,121 @@
-import { NextResponse } from 'next/server'
-import prisma from '@/prisma/client'
-import jwt from 'jsonwebtoken' // You'll need to install this package to generate JWT tokens
-import { cookies } from 'next/headers' // To access and set cookies
-
-const SECRET_KEY = process.env.JWT_SECRET_KEY || 'your-secret-key' // Replace with your own secret key
+import bcrypt from "bcrypt";
+import { calculateAge } from "@/utils/utilFunctions";
+import prisma from "@/prisma/client";
+import { NextResponse } from "next/server";
 
 export async function POST(req) {
-  try {
-    // Parse the incoming JSON body
-    const {
-      phone,
-      supabaseAuthId,
-      name,
-      email,
-      city,
-      state,
-      gender,
-      dob,
-      profileCreatedBy,
-    } = await req.json()
+ try {
+    const { email, password, name, state, city, dob, gender, profileCreatedBy } = await req.json();
 
+
+    // Check if the email already exists
     const existingUser = await prisma.user.findUnique({
-      where : {phone : phone}
-    })
-
-    if(existingUser){
-      return NextResponse.json({error : "User already exists"}, {status : 200});
+      where : {email}
+    });
+    if (existingUser) {
+      return NextResponse.json({ error: "Email already exists" }, { status: 400 });
     }
 
-    // Create user in the database using Prisma
-    const user = await prisma.user.create({
-      data: {
-        phone,
-        supabaseAuthId,
+    const calculatedAge = calculateAge(dob);
+    const age = calculatedAge.toString();
+
+    // Hash the password before storing
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.user.create({
+      data : {
         name,
         email,
+        password : hashedPassword,
         city,
         state,
         gender,
         dob,
         profileCreatedBy,
-      },
+        age
+      }
     })
 
-    // Generate a token with the user's id or any other information you want to include
-    const token = jwt.sign(
-      { userId: user.id, supabaseAuthId: user.supabaseAuthId, gender:user.gender, phone: user.phone },
-      SECRET_KEY,
-      { expiresIn: '12h' } // Set expiration time for the token (1 hour here)
-    )
+    return NextResponse.json({ message: "User created successfully" }, { status: 200 });
+ } catch (error) {
+    console.log(error.message || error);
+    return NextResponse.json({message : "Internal Server Error"}, {status : 500})
+ }
+}
 
-    // Set the token in the cookies
-    const cookieStore = await cookies()
-    cookieStore.set('authToken', token, {
-      httpOnly: true, // Ensures the cookie is not accessible by client-side JavaScript
-      secure: process.env.NODE_ENV === 'production', // Only set as secure in production
-      maxAge: 60 * 60 * 12, // 1 hour expiration for the cookie
-      path: '/', // Available site-wide
-      sameSite: 'Strict', // Prevents the cookie from being sent cross-site
+
+
+export async function GET(req){
+  try {
+    const userId = req.nextUrl.searchParams.get("userId");
+    if (!userId) {
+    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where : {id : userId}
     })
 
-
-
-    // If the user was created successfully, return a 201 status with the user data
-    return NextResponse.json({ message: 'User created successfully', user }, { status: 201 })
+    if (user) {
+      return NextResponse.json(user, { status: 200 });
+  } else {
+      return NextResponse.json({ error: "User not found" }, { status: 400 });
+  }
   } catch (error) {
-    console.error('Error creating user:', error)
-    return NextResponse.json({ error: 'An error occurred while creating the user' }, { status: 500 })
+        console.error("BAISC USER RETRIEVAL: ", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+
+}
+
+
+
+export async function PUT(req){
+  try {
+    const {userId, city, state} = await req.json();
+
+    const updatedUser = await prisma.user.update({
+      where : {id : userId},
+      data : {
+        city,
+        state
+      }
+    })
+
+    return NextResponse.json({message : "User Updated Succesfully"}, {status : 200})
+
+
+  } catch (error) {
+    return NextResponse.json({error : "Internal Server Error"}, {status : 500})
   }
 }
 
 
-export async function GET(req) {
-    try {
-      // Access the userId from query parameters
-      const userId = req.nextUrl.searchParams.get('userId')
-  
-      // If userId is not provided, return an error
-      if (!userId) {
-        return NextResponse.json({ error: 'userId is required' }, { status: 400 })
-      }
-  
-      // Find the user by their ID
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-      })
-  
-      // If the user doesn't exist, return an error
-      if (!user) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 })
-      }
-  
-      // Return the user data
-      return NextResponse.json(user, { status: 200 })
-    } catch (error) {
-      console.error('Error fetching user:', error)
-      return NextResponse.json({ error: 'An error occurred while fetching the user' }, { status: 500 })
+export async function DELETE(req) {
+  try {
+    const userId = req.nextUrl.searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json({ message: "User ID is required" }, { status: 400 });
     }
+
+    // Delete associated data in dependent tables
+    await prisma.personalDetails.deleteMany({ where: { userId } });
+    await prisma.partnerPreferences.deleteMany({ where: { userId } });
+    await prisma.religiousDetails.deleteMany({ where: { userId } });
+    await prisma.images.deleteMany({ where: { userId } });
+
+    // Delete the main user record
+    const deletedUser = await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return NextResponse.json(
+      { message: "User and associated data deleted successfully", deletedUser },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("DELETE USER: ", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  }
 }
-
-
-export async function PUT(req) {
-    try {
-      // Parse the incoming JSON body
-      const { userId, city, state } = await req.json()
-  
-      // Find the user by their ID and update their details
-      const user = await prisma.user.update({
-        where: { id: userId },
-        data: {
-          city,
-          state,
-        },
-      })
-  
-      // If the user doesn't exist, return an error
-      if (!user) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 })
-      }
-  
-      // Return the updated user data
-      return NextResponse.json({ message: 'User updated successfully', user }, { status: 200 })
-    } catch (error) {
-      console.error('Error updating user:', error)
-      return NextResponse.json({ error: 'An error occurred while updating the user' }, { status: 500 })
-    }
-}
-
-
-

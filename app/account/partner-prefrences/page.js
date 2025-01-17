@@ -8,8 +8,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import axios from 'axios'
+import { useSession } from 'next-auth/react'
+import { ClipLoader } from 'react-spinners'
+import { useAlert } from '@/context/AlertContext'
 
 const ageRange = [
   "18", "19", "20", "21", "22", "23", "24", "25", "26", "27",
@@ -60,44 +63,15 @@ const generatePartnerSchema = (gender) => {
     
 
 const PartnerPreferencesEditPage = () => {
+
+    const { data: session, status } = useSession();
+
   const [user,setUser] = useState(null);
-  const [schema,setScehma] = useState(null);
-  const [gender,setGender] = useState(null);
+  const gender = session?.user?.gender || "";
+    const schema = generatePartnerSchema(gender);
   const [partnerPreferences, setPartnerPrefrences] = useState(null);
   const router = useRouter();
-
-useEffect(() => {
-        async function extractUser() {
-            const response = await fetch('/api/user/extract-user', {
-                method: 'GET',
-                credentials: 'include', // Include cookies in the request
-            });
-              
-            if (response.ok) {
-                const data = await response.json();
-                setUser(data);
-                console.log('User:', data);
-                setGender(data.gender);
-                const generatedSchema = generatePartnerSchema(data.gender)
-                setScehma(generatedSchema);
-                fetchPartnerPreferencs(data.id);
-            } else {
-                console.error('Error:', await response.json());
-            }
-        };
-
-        async function fetchPartnerPreferencs(userId) {
-            const response = await axios.get(`/api/user/add-partner-prefrence?userId=${userId}`)
-
-            if (response.status === 200) {
-                console.log(response.data)
-                setPartnerPrefrences(response.data);
-            } else {
-                console.error('Error fetching partner preferences:', response.error);
-            }
-        }
-        extractUser();
-    },[]);
+  const {showAlert} = useAlert();
 
     const {
         register,
@@ -110,55 +84,84 @@ useEffect(() => {
         resolver: zodResolver(schema),
     });
 
+
     useEffect(() => {
-             if (partnerPreferences) {
-                setValue("ageGroupFrom", partnerPreferences?.ageGroupFrom || "");
-                setValue("ageGroupTo", partnerPreferences?.ageGroupTo || "");
-                setValue("state", partnerPreferences?.state || "");
-                setValue("maritalStatus", partnerPreferences?.maritalStatus || "");
-                setValue("relegiousPrefrence", partnerPreferences?.religiousPreference || "");
-                setValue("ethnicityPrefrence", partnerPreferences?.ethnicityPreference || "");
-                setValue("educationLevel", partnerPreferences?.educationLevel || "");
-                setValue("work", partnerPreferences?.work || "");
-                setValue("considerSomeoneHavingChildren", partnerPreferences?.considerSomeoneHavingChildren || "");
-              if(gender === 'male'){
-                setValue("hijab", partnerPreferences?.hijab || "");
-              }
-              if(gender === 'female'){
-                setValue("smoke", partnerPreferences?.smoke || "");
-              }
-             }
-    }, [partnerPreferences, setValue, gender]);
+        const fetchPartnerPreferencs = async () => {
+            if(status === 'authenticated' && session){
+                try {
+                    const response = await axios.get(`/api/user/add-partner-prefrence?userId=${session?.user?.id}`)
+                    if (response.status === 200) {
+                        const data = response.data;
+                        setPartnerPrefrences(response.data);
+                        setValue("ageGroupFrom", data?.ageGroupFrom || "");
+                        setValue("ageGroupTo", data?.ageGroupTo || "");
+                        setValue("state", data?.state || "");
+                        setValue("maritalStatus", data?.maritalStatus || "");
+                        setValue("relegiousPrefrence", data?.religiousPreference || "");
+                        setValue("ethnicityPrefrence", data?.ethnicityPreference || "");
+                        setValue("educationLevel", data?.educationLevel || "");
+                        setValue("work", data?.work || "");
+                        setValue("considerSomeoneHavingChildren", data?.considerSomeoneHavingChildren || "");
+                        if(gender === 'male'){
+                            setValue("hijab", data?.hijab || "");
+                          }
+                        if(gender === 'female'){
+                            setValue("smoke", data?.smoke || "");
+                        }
 
-  
+                    } else {
+                        console.log('Error fetching partner preferences:', response.data.error);
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        }
+        fetchPartnerPreferencs(session?.user?.id);
+    },[status, session, gender, setValue]);
 
-  const onSubmit = async (data) => {
+
+  const onSubmit = async (formData) => {
     try {
         let response;
         if (gender === 'male') {
             response = await axios.put('/api/user/add-partner-prefrence', {
-                ...data,
-                userId: user.id,
+                ...formData,
+                userId: session.user.id,
             });
         } else if (gender === 'female') {
             response = await axios.put('/api/user/add-partner-prefrence', {
-                ...data,
-                userId: user.id,
+                ...formData,
+                userId: session.user.id,
             });
         }
 
         if (response.status === 200) {
             router.push('/account');
         } else {
+            showAlert("Something Went Wrong. Please Try Again")
             console.log('Error updating details:', response.error);
         }
     } catch (error) {
         console.error('Error:', error);
     }
   }
+
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center">
+        <ClipLoader size={50} />
+      </div>
+    );
+  }
+
+  if (!session) {
+    router.push("/auth");
+  }
   return (
     <section className="mb-10" >
-    <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+    <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
         <Link href='/account' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
         <div className='w-full' >
             <h1 className='text-center text-xl font-medium' >Edit Partner Prefrences</h1>
@@ -168,13 +171,13 @@ useEffect(() => {
     <div className="mt-5" >
 
         <div className='flex items-center justify-center mt-5' >
-            <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20 w-full md:w-1/2' >
-                <div className='' >
+            <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20 w-full md:w-1/2 flex items-center justify-center flex-col' >
+                <div className='w-[300px]' >
                     <label className="text-sub_text_2 text-sm mb-3" >Age Group: </label>
-                    <div className='grid grid-cols-3 items-baseline mt-2' >
+                    <div className='flex justify-between items-baseline mt-2' >
                         <div className='' >
                             <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupFrom", value)} value={watch("ageGroupFrom")} >
-                                <SelectTrigger>
+                                <SelectTrigger className="col-span-1 w-[115px] h-[40px]" >
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -190,7 +193,7 @@ useEffect(() => {
                         </div>
                         <div className='' >
                             <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupTo", value)} value={watch("ageGroupTo")} >
-                                <SelectTrigger>
+                                <SelectTrigger className="col-span-1 w-[115px] h-[40px]">
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -208,7 +211,7 @@ useEffect(() => {
                 <div className="mt-3" >
                     <label className="text-sub_text_2 text-sm mb-3" >State: </label>
                     <div className='mt-2' ><Select  onValueChange={(value) => setValue("state", value)} value={watch("state")} >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-[300px] h-[40px]">
                             <SelectValue placeholder="Select a state" />
                         </SelectTrigger>
                         <SelectContent>
@@ -225,7 +228,7 @@ useEffect(() => {
                     <label className="text-sub_text_2 text-sm mb-3">Marital Status</label>
                     <div className='mt-2' >
                         <Select onValueChange={(value) => setValue("maritalStatus", value)} value={watch("maritalStatus")} >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[300px] h-[40px]">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -241,7 +244,7 @@ useEffect(() => {
                 <div className="mt-3" >
                     <label className="text-sub_text_2 text-sm mb-3">Relegiousity Prefrence</label>
                     <Select className="text-sub_text_2"  onValueChange={(value) => setValue("relegiousPrefrence", value)} value={watch("relegiousPrefrence")} >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-[300px] h-[40px]">
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
@@ -259,7 +262,7 @@ useEffect(() => {
                         <label className="text-sub_text_2 text-sm mb-3">Do you prefer a sister who wears the hijab?</label>
                         <div className='mt-2' >
                             <Select className="text-sub_text_2"  onValueChange={(value) => setValue("hijab", value)} value={watch("hijab")} >
-                                <SelectTrigger>
+                                <SelectTrigger className="w-[300px] h-[40px]">
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -279,7 +282,7 @@ useEffect(() => {
                         <label className="text-sub_text_2 text-sm mb-3">Would you consider a brother who smokes?</label>
                         <div className='mt-2' >
                             <Select className="text-sub_text_2"  onValueChange={(value) => setValue("smoke", value)} value={watch("smoke")} >
-                                <SelectTrigger>
+                                <SelectTrigger className="w-[300px] h-[40px]">
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -297,7 +300,7 @@ useEffect(() => {
                     <label className="text-sub_text_2 text-sm mb-3">Ethnicity Prefrence</label>
                     <div className='mt-2' >
                     <Select onValueChange={(value) => setValue("ethnicityPrefrence", value)} value={watch("ethnicityPrefrence")} >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-[300px] h-[40px]">
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
@@ -323,7 +326,7 @@ useEffect(() => {
                     <label className="text-sub_text_2 text-sm mb-3">Education Level</label>
                     <div className='mt-2' >
                     <Select onValueChange={(value) => setValue("educationLevel", value)} value={watch("educationLevel")} >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-[300px] h-[40px]">
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
@@ -346,7 +349,7 @@ useEffect(() => {
                     </label>
                     <div className='mt-2' >
                     <Select onValueChange={(value) => setValue("work", value)} value={watch("work")} >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-[300px] h-[40px]">
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
@@ -366,7 +369,7 @@ useEffect(() => {
                     </label>
                     <div className='mt-2' >
                     <Select onValueChange={(value) => setValue("considerSomeoneHavingChildren", value)} value={watch("considerSomeoneHavingChildren")} >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-[300px] h-[40px]">
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>

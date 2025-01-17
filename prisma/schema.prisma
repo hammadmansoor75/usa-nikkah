@@ -15,16 +15,17 @@ datasource db {
 
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  supabaseAuthId String @unique
-  phone String @unique
   name String
-  email String
+  email String @unique
+  password String
   city String
   state String
   gender String
   dob String
+  age String
   profileCreatedBy String
   adminVerificationStatus Boolean @default(false)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -37,7 +38,8 @@ model User {
   matchedUsers           String[] @default([]) @db.ObjectId
   blockedUsers           String[] @default([]) @db.ObjectId
   profileViews           String[] @default([]) @db.ObjectId
-  shortlistedBy           String[] @default([]) @db.ObjectId
+  shortlistedBy          String[] @default([]) @db.ObjectId
+  prospectiveMatch       String[] @default([]) @db.ObjectId
   
   // Index on userId for faster searches
 }

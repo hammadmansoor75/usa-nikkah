@@ -8,36 +8,18 @@ import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 const SearchProfile = ({profile}) => {
     const [profilePhoto, setProfilePhoto] = useState();
+    const { data: session, status } = useSession();
 
     const [randomNumber, setRandomNumber] = useState(null);
 
-    const [user,setUser] = useState();
     const router = useRouter();
 
     const [thumbsUpOpen, setThumbsUpOpen] = useState(false);
 
-    useEffect(() => {
-        async function extractUser() {
-          const response = await fetch('/api/user/extract-user', {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-          });
-        
-          if (response.ok) {
-            const data = await response.json();
-            console.log('User:', data);
-            setUser(data)
-            
-          } else {
-            console.error('Error:', await response.json());
-          }
-        }
-        extractUser();
-        
-      },[])
 
   
 
@@ -66,7 +48,7 @@ const SearchProfile = ({profile}) => {
   const handleThumbsUp = async () => {
     try {
         const response = await axios.post('/api/matching/shortlisted', {
-            loggedInUserId : user.id,
+            loggedInUserId : session.user.id,
             targetUserId : profile.id
         })
         if(response.status === 200){
@@ -93,7 +75,7 @@ const toggleThumbsUpOpen = () => setThumbsUpOpen(!thumbsUpOpen);
             </div>
             <div>
                 <h3 className='text-sm text-us_blue font-medium' >{profile.name}</h3>
-                <p className='text-xs text-dark_text' >{calculateAge(profile.dob)} , {profile.personalDetails.maritalStatus} </p>
+                <p className='text-xs text-dark_text capitalize' >{calculateAge(profile.dob)} , {profile?.personalDetails?.maritalStatus} </p>
                 <p className='text-xs text-dark_text' >{profile.city} , {profile.state}</p>
                 <button onClick={toggleThumbsUpOpen} className='bg-us_blue flex items-center justify-between gap-2 text-white mt-2 px-3 py-2 text-sm rounded-lg cursor-pointer' ><StarOutlinedIcon className='text-yellow-400' /><span>Shortlist</span></button>
             </div>

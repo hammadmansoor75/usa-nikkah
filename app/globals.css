@@ -119,6 +119,22 @@ input:focus {
   height: 50px;
 }
 
+.custom-input{
+  width: 322px;
+  padding: 10px !important;
+  border: 1px solid #C4C4C4;
+  border-radius: 10px;
+  height: 50px;
+}
+
+.religious-input{
+  width: 322px;
+  padding: 10px !important;
+  border: 1px solid #C4C4C4;
+  border-radius: 10px;
+  height: 40px;
+}
+
 .input-black{
   width: 300px;
   padding: 10px !important;

@@ -10,9 +10,14 @@ import ThumbUpAltRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
 import ThumbDownRoundedIcon from '@mui/icons-material/ThumbDownRounded';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { ClipLoader } from 'react-spinners';
+import { useAlert } from '@/context/AlertContext';
 
 
-const ShortlistedProfile = ({profile, removeFromShortlistedUsers}) => {
+const ShortlistedProfile = ({profile, removeFromShortlistedUsers, getMatchedUsers}) => {
+    const { data: session, status } = useSession();
+
     const [profilePhoto, setProfilePhoto] = useState();
 
     const [maritalStatus, setMaritalStatus] = useState();
@@ -23,31 +28,11 @@ const ShortlistedProfile = ({profile, removeFromShortlistedUsers}) => {
     const [user,setUser] = useState();
 
     const [thumbsDownOpen, setThumbsDownOpen] = useState(false);
+    const [thumbsUpOpen, setThumbsUpOpen] = useState(false);
 
     const router = useRouter();
+    const {showAlert} = useAlert();
     
-    
-        useEffect(() => {
-            async function extractUser() {
-              const response = await fetch('/api/user/extract-user', {
-                method: 'GET',
-                credentials: 'include', // Include cookies in the request
-              });
-            
-              if (response.ok) {
-                const data = await response.json();
-                console.log('User:', data);
-                setUser(data)
-                
-              } else {
-                console.error('Error:', await response.json());
-              }
-            }
-            extractUser();
-            
-    },[])
-
-  
 
     useEffect(() => {
         const fetchProfilePhoto = async () => {
@@ -77,12 +62,13 @@ const ShortlistedProfile = ({profile, removeFromShortlistedUsers}) => {
     
 
     const toggleThumbsDownOpen = () => setThumbsDownOpen(!thumbsDownOpen);
+    const toggleThumbsUpOpen = () => setThumbsUpOpen(!thumbsUpOpen);
 
     const handleThumbsDown = async () => {
         try{
             const response = await axios.delete('/api/matching/shortlisted', {
                 data : {
-                    loggedInUserId : user.id,
+                    loggedInUserId : session.user.id,
                     targetUserId : profile.id
                 }
             })
@@ -95,11 +81,44 @@ const ShortlistedProfile = ({profile, removeFromShortlistedUsers}) => {
         }
     }
 
+    const handleThumbsUp = async () => {
+        try {
+            const response = await axios.post('/api/matching/prospective-match', {
+                loggedInUserId : session.user.id,
+                targetUserId : profile.id
+            })
+            if(response.status === 201){
+                removeFromShortlistedUsers(profile.id)
+                toggleThumbsUpOpen();
+                getMatchedUsers(session.user.id);
+                showAlert("Congratulations! It's a Match")
+            }else if(response.status === 200){
+                removeFromShortlistedUsers(profile.id)
+                toggleThumbsUpOpen();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
     // Function to generate a random number between 40 and 90
 
     const handleProfileView = () => {
         router.push(`/profile-view-user/${profile.id}`)
     }
+
+    if (status === "loading") {
+        return (
+          <div className="flex items-center justify-center">
+            <ClipLoader size={50} />
+          </div>
+        );
+      }
+    
+      if (!session) {
+        router.push("/auth");
+      }
   
 
   return (
@@ -129,7 +148,7 @@ const ShortlistedProfile = ({profile, removeFromShortlistedUsers}) => {
                     <button className='bg-us_blue px-2 py-1 rounded-lg flex items-center cursor-pointer justify-center' >
                         <FavoriteOutlinedIcon className='text-red-500' />
                     </button>
-                    <button className='bg-us_blue flex items-center justify-between gap-2 text-white px-2 py-1 text-sm rounded-lg cursor-pointer' ><ThumbUpAltRoundedIcon /></button>
+                    <button onClick={toggleThumbsUpOpen} className='bg-us_blue flex items-center justify-between gap-2 text-white px-2 py-1 text-sm rounded-lg cursor-pointer' ><ThumbUpAltRoundedIcon /></button>
                 </div>
             </div>
         </div>
@@ -146,6 +165,23 @@ const ShortlistedProfile = ({profile, removeFromShortlistedUsers}) => {
                 </div>
             </div>
         )}
+
+
+        {thumbsUpOpen && (
+                <div className='fixed inset-0 flex items-center justify-center bg-us_blue bg-opacity-50 px-10' >
+                <div className='bg-white px-6 py-12 rounded-2xl shadow-md' >
+                    <p className='text-center text-dark_text text-md' >Are you sure you consider this person as
+                    a prospective match?</p>
+                    <div className='flex items-center justify-between mt-5' >
+                        <button className='rounded-full bg-sub_text_2 text-white px-6 py-2' onClick={toggleThumbsUpOpen} >CANCEL</button>
+                        <button className='rounded-full bg-us_blue text-white px-6 py-2' onClick={handleThumbsUp} >YES</button>
+                    </div>
+                    
+                </div>
+            </div>
+        )}
+
+
     </div>
   )
 }

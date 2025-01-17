@@ -13,8 +13,14 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import AddAPhotoOutlinedIcon from '@mui/icons-material/AddAPhotoOutlined';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { redirect } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { ClipLoader } from 'react-spinners';
 
 const ViewProfilePage = () => {
+
+    const {data : session, status} = useSession();
+
     const [user, setUser] = useState();
     const [basicDetails, setBasicDetails] = useState();
     const [personalDetails, setPersonalDetails] = useState();
@@ -34,26 +40,19 @@ const ViewProfilePage = () => {
 
 
     useEffect(() => {
-        async function fetchUser() {
-            const response = await fetch('/api/user/extract-user', {
-                method: 'GET',
-                credentials: 'include',
-            });
+        
+        
 
-            if (response.ok) {
-                const data = await response.json();
-                setUser(data);
-                setGender(data.gender);
-                fetchBasicDetails(data.id);
-                fetchImages(data.id);
-                fetchReligiousDetails(data.id);
-                fetchPersonalDetails(data.id);
-                fetchPartnerPrefrences(data.id);
-            } else {
-                console.error('Error:', await response.json());
+        const getBasicDetails = async () => {
+            const response = await axios.get(`/api/user/create-user?userId=${session.user.id}`);
+            if(response.status === 200){
+                setUser(response.data);
+            }else{
+                console.log(response.data);
             }
         }
-
+       
+        
         async function fetchReligiousDetails(userId) {
             const response = await axios.get(`/api/user/add-relegious-details?userId=${userId}`)
 
@@ -112,27 +111,45 @@ const ViewProfilePage = () => {
             }
         }
 
-        fetchUser();
-    }, []);
+        if(status === 'authenticated' && session){
+            setGender(session.user.gender);
+            getBasicDetails()
+            fetchBasicDetails(session.user.id);
+            fetchImages(session.user.id);
+            fetchReligiousDetails(session.user.id);
+            fetchPersonalDetails(session.user.id);
+            fetchPartnerPrefrences(session.user.id);
+        }
+        
+    }, [status, session]);
+
+    if(status === 'loading'){
+        return <div className='flex items-center justify-center' >
+            <ClipLoader size={50} />
+        </div>
+    }
+    
+    if(!session){
+        router.push('/auth')
+    }
   return (
     <main className='relative' >
 
-        <div className='absolute top-4 left-4 z-10' >
+        <div className='absolute top-4 left-8 z-10' >
             <Link href="/account">
                 <Image src="/assets/back-icon.svg" alt="backIcon" height={30} width={30} />
             </Link>
         </div>
 
         
-
         <div className='' >
-            {userImagesArray && (
-                <UserPhotoCarousel photos={userImagesArray} />
-            )}
-        </div>
+                {userImagesArray && (
+                    <UserPhotoCarousel photos={userImagesArray} />
+                )}
+            </div>
 
         <div className='flex items-center justify-center' >
-            <div className='absolute bg-white w-full min-h-96 z-10 top-[340px] rounded-t-[50px] mb-10 px-7 py-5' >
+            <div className='absolute bg-white w-full min-h-96 z-10 top-[350px] rounded-t-[50px] mb-10 px-7 py-5' >
                 <p className='text-center text-2xl text-us_blue font-semibold' >Your Profile</p>
                 <div className='border-b border-black mt-2' ></div>
 

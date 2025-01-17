@@ -31,7 +31,7 @@ export default function Navbar() {
     { name: "Matches", path: "/matches", icon: <Image src='/assets/matches-nav-active.svg' height={24} width={24} alt="matches" />, activeIcon : <Image src='/assets/matches-nav.svg' height={24} width={24} alt="matches" />  },
     { name: "Interest", path: "/interest", icon: <FavoriteIcon fontSize="medium" />, activeIcon : <FavoriteBorderIcon fontSize="medium" />  },
     { name: "Chat", path: "/chat", icon: <Image src='/assets/chat-nav-active.svg' height={24} width={24} alt="chat" />, activeIcon : <Image src='/assets/chat-nav.svg' height={24} width={24} alt="chat" />  },
-    { name: "Settings", path: "/account", icon: <Image src='/assets/settings-nav-active.svg' height={24} width={24} alt="settings" />, activeIcon : <Image src='/assets/settings-nav.svg' height={24} width={24} alt="settings" /> },
+    { name: "Settings", path: "/settings", icon: <Image src='/assets/settings-nav-active.svg' height={24} width={24} alt="settings" />, activeIcon : <Image src='/assets/settings-nav.svg' height={24} width={24} alt="settings" /> },
   ];
 
   return (

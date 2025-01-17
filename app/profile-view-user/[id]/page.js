@@ -17,12 +17,15 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import ChatIcon from '@mui/icons-material/Chat';
+import { useSession } from 'next-auth/react';
 
 const ProfileViewUser = () => {
     
+    const { data: session, status } = useSession();
     const [loggedInUser,setLoggedInUser] = useState();
 
     const [user, setUser] = useState();
+    
     const [basicDetails, setBasicDetails] = useState();
     const [personalDetails, setPersonalDetails] = useState();
     const [relegiousDetails, setReligiousDetails] = useState();
@@ -41,17 +44,19 @@ const ProfileViewUser = () => {
 
 
     useEffect(() => {
-        if(typeof window !== 'undefined'){
-            const urlPath = window.location.pathname;
-            const idFromPath = urlPath.split("/").pop();
-            if(idFromPath){
-                extractUser(idFromPath)
-                // setProfileId(idFromPath);
-                fetchBasicDetails(idFromPath);
-                fetchImages(idFromPath);
-                fetchReligiousDetails(idFromPath);
-                fetchPersonalDetails(idFromPath);
-                fetchPartnerPrefrences(idFromPath);
+        if(status === 'authenticated' && session){
+            if(typeof window !== 'undefined'){
+                const urlPath = window.location.pathname;
+                const idFromPath = urlPath.split("/").pop();
+                if(idFromPath){
+                    extractUser(idFromPath)
+                    // setProfileId(idFromPath);
+                    fetchBasicDetails(idFromPath);
+                    fetchImages(idFromPath);
+                    fetchReligiousDetails(idFromPath);
+                    fetchPersonalDetails(idFromPath);
+                    fetchPartnerPrefrences(idFromPath);
+                }
             }
         }
 
@@ -125,37 +130,23 @@ const ProfileViewUser = () => {
         }
 
         async function extractUser(profileID) {
-            const response = await fetch('/api/user/extract-user', {
-              method: 'GET',
-              credentials: 'include', // Include cookies in the request
-            });
-          
-            if (response.ok) {
-              const data = await response.json();
-              console.log('User:', data);
-              setLoggedInUser(data);
+            const addProfileViewResponse = await axios.post('/api/matching/profile-view', {
+                loggedInUserId : session.user.id,
+                targetUserId : profileID
+          })
 
-              console.log("Logged In User Id: ", data.id);
-              console.log("Target User Id: ", profileID)
-
-              const addProfileViewResponse = await axios.post('/api/matching/profile-view', {
-                
-                    loggedInUserId : data.id,
-                    targetUserId : profileID
-                
-              })
-
-              console.log(addProfileViewResponse.data);
-              
-            } else {
-              console.error('Error:', await response.json());
+          const response = await axios.get(`/api/user/create-user?userId=${session.user.id}`);
+            if(response.status === 200){
+                setLoggedInUser(response.data);
+            }else{
+                console.log(response.data);
             }
         }
-    }, [])
+    }, [status, session])
   return (
     <main className='relative' >
 
-        <div className='absolute top-4 left-4 z-10' >
+        <div className='absolute top-4 left-8 z-10' >
             <Link href="/matches">
                 <Image src="/assets/back-icon.svg" alt="backIcon" height={30} width={30} />
             </Link>
@@ -167,20 +158,23 @@ const ProfileViewUser = () => {
             )}
         </div>
 
-        <div className="absolute top-[330px] left-1/2 transform -translate-x-1/2 flex gap-10 z-20">
-        <button className="bg-white border border-gray-300 rounded-full shadow-md w-20 h-20 flex items-center justify-center transform -translate-y-1/2">
-          < StarOutlinedIcon className='text-yellow-400' fontSize='large' />
-        </button>
-        <button className="bg-white border border-gray-300 rounded-full shadow-md w-20 h-20 flex items-center justify-center transform -translate-y-1/2">
-          <FavoriteOutlinedIcon className='text-red-500' fontSize='large' />
-        </button>
-        <button className="bg-white border border-gray-300 rounded-full shadow-md w-20 h-20 flex items-center justify-center transform -translate-y-1/2">
-          <ChatIcon className='text-us_blue' fontSize='large' />
-        </button>
-      </div>
+        
 
         <div className='flex items-center justify-center' >
-            <div className='absolute bg-white w-full min-h-96 z-10 top-[340px] mb-10 px-5 py-5 border-t border-black overflow-hidden rounded-t-[40px] !important' >
+        <div className='flex items-center justify-center' >
+            <div className="absolute top-[340px] flex items-center z-20 justify-center gap-7">
+            <div className='bg-white rounded-full shadow-lg w-20 h-20 flex items-center justify-center transform -translate-y-1/2' >
+                <Image src='/assets/star.svg' className='p-5' alt='star' layout='fill'/>
+            </div>
+            <div className='bg-white rounded-full shadow-lg px-4 py-4 flex items-center justify-center transform -translate-y-1/2 w-20 h-20' >
+                <Image src='/assets/like.svg' className='p-5' alt='star' layout='fill' />
+            </div>
+            <div className='bg-white rounded-full shadow-lg w-20 h-20 flex items-center justify-center transform -translate-y-1/2' >
+                <Image src='/assets/chat.svg' className='p-5' alt='star' layout='fill' />
+            </div>
+        </div>
+        </div>
+            <div className='absolute bg-white w-full min-h-96 z-10 top-[340px] mb-10 px-5 py-5 border-t border-black overflow-hidden rounded-t-[50px] !important' >
                 {/* <p className='text-center text-2xl font-medium' >Your Profile</p> */}
                 {/* <div className='border-b border-black mt-5' ></div> */}
 

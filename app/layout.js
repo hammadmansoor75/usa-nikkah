@@ -1,6 +1,7 @@
-import { SignupProvider } from "@/providers/AccountProvider";
 import "./globals.css";
 import {Roboto} from 'next/font/google'
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import { AlertProvider } from "@/context/AlertContext";
 
 const roboto = Roboto({
   weight: '400',
@@ -20,7 +21,9 @@ export default function RootLayout({ children }) {
       <body
         className={roboto.className}
       >
-        <SignupProvider>{children}</SignupProvider>
+        <SessionProviderWrapper>
+          <AlertProvider>{children}</AlertProvider>
+        </SessionProviderWrapper>
         
       </body>
     </html>

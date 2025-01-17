@@ -9,11 +9,15 @@ import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import ThumbUpAltRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
 import ThumbDownRoundedIcon from '@mui/icons-material/ThumbDownRounded';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useAlert } from '@/context/AlertContext';
 
 
-const NewProfile = ({profile, removeFromNewUsers}) => {
+const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
     const [profilePhoto, setProfilePhoto] = useState();
+    const { data: session, status } = useSession();
 
+    const {showAlert} = useAlert();
     const [maritalStatus, setMaritalStatus] = useState();
 
     const [randomNumber, setRandomNumber] = useState(null);
@@ -27,25 +31,7 @@ const NewProfile = ({profile, removeFromNewUsers}) => {
     const router = useRouter();
     
     
-        useEffect(() => {
-            async function extractUser() {
-              const response = await fetch('/api/user/extract-user', {
-                method: 'GET',
-                credentials: 'include', // Include cookies in the request
-              });
-            
-              if (response.ok) {
-                const data = await response.json();
-                console.log('User:', data);
-                setUser(data)
-                
-              } else {
-                console.error('Error:', await response.json());
-              }
-            }
-            extractUser();
-            
-    },[])
+        
 
   
 
@@ -76,11 +62,16 @@ const NewProfile = ({profile, removeFromNewUsers}) => {
 
     const handleThumbsUp = async () => {
         try {
-            const response = await axios.post('/api/matching/shortlisted', {
-                loggedInUserId : user.id,
+            const response = await axios.post('/api/matching/prospective-match', {
+                loggedInUserId : session.user.id,
                 targetUserId : profile.id
             })
-            if(response.status === 200){
+            if(response.status === 201){
+                removeFromNewUsers(profile.id)
+                toggleThumbsUpOpen();
+                getMatchedUsers(session.user.id);
+                showAlert("Congratulations! It's a Match")
+            }else if(response.status === 200){
                 removeFromNewUsers(profile.id)
                 toggleThumbsUpOpen();
             }
@@ -106,29 +97,27 @@ const NewProfile = ({profile, removeFromNewUsers}) => {
 
   return (
     <div className='bg-white border border-light_gray p-5 shadow-md w-full rounded-lg md:w-1/3' >
-        <div className='flex items-center justify-between' >
+        <div className='flex items-start justify-between' >
             <div className='overflow-hidden rounded-full border-2 border-us_blue w-20 h-20' >
                 {profilePhoto && (
                     <Image onClick={handleProfileView} className='object-cover w-full h-full' src={profilePhoto} alt='profile' width={100} height={100}/>
                 )}
             </div>
             <div className='flex items-start justify-start flex-col' >
-                <div className='flex items-start justify-between gap-10' >
                     <div>
                         <h3 className='text-sm text-us_blue font-medium' >{profile.name}</h3>
-                        <p className='text-xs text-dark_text' >{calculateAge(profile.dob)} , {maritalStatus}</p>
-                        <p className='text-xs text-dark_text' >{profile.city} , {profile.state}</p>
+                        <p className='text-xs text-dark_text capitalize' >{calculateAge(profile.dob)} , {maritalStatus}</p>
+                        <p className='text-xs text-dark_text capitalize' >{profile.city} , {profile.state}</p>
                     </div>
-                    <div className='' >
-                        <p className='text-green-500' >{randomNumber}%</p>
+                    <div className='flex items-center justify-center gap-4 mt-4' >
+                        <button onClick={toggleThumbsUpOpen} className='bg-us_blue flex items-center justify-between gap-2 text-white px-4 py-2 text-sm rounded-lg cursor-pointer' ><ThumbUpAltRoundedIcon /></button>
+                        <button onClick={toggleThumbsDownOpen} className='bg-us_blue px-4 py-2 rounded-lg flex items-center cursor-pointer justify-center' >
+                            <ThumbDownRoundedIcon className='text-white' />
+                        </button>
                     </div>
-                </div>
-                <div className='flex items-center justify-center gap-4 mt-4' >
-                    <button onClick={toggleThumbsUpOpen} className='bg-us_blue flex items-center justify-between gap-2 text-white px-4 py-2 text-sm rounded-lg cursor-pointer' ><ThumbUpAltRoundedIcon /></button>
-                    <button onClick={toggleThumbsDownOpen} className='bg-us_blue px-4 py-2 rounded-lg flex items-center cursor-pointer justify-center' >
-                        <ThumbDownRoundedIcon className='text-white' />
-                    </button>
-                </div>
+            </div>
+            <div className='' >
+                <p className='text-green-500' >{randomNumber}%</p>
             </div>
             
         </div>

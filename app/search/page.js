@@ -9,6 +9,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from 'axios';
 import SearchProfile from '@/components/SearchProfile';
+import { redirect } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { ClipLoader } from 'react-spinners';
 
 const searchSchema = z.object({
     ageGroupFrom : z.string().optional(),
@@ -43,6 +46,8 @@ const US_STATES = [
 
 const SearchPage = () => {
 
+    const { data: session, status } = useSession();
+
     const [gender,setGender] = useState();
     const [step,setStep] = useState(0);
     const [profiles,setProfiles] = useState()
@@ -53,22 +58,10 @@ const SearchPage = () => {
     const toggleOpen = () => setOpen(false);
 
     useEffect(() => {
-        async function extractUser() {
-          const response = await fetch('/api/user/extract-user', {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-          });
-        
-          if (response.ok) {
-            const data = await response.json();
-            setGender(data.gender);
-            
-          } else {
-            console.error('Error:', await response.json());
-          }
+        if(status === 'authenticated' && session){
+            setGender(session.user.gender);
         }
-        extractUser();
-      },[])
+      },[status, session])
 
 
     const {
@@ -104,9 +97,22 @@ const SearchPage = () => {
         }
     }
     
+
+    if (status === "loading") {
+        return (
+          <div className="flex items-center justify-center">
+            <ClipLoader size={50} />
+          </div>
+        );
+      }
+    
+      if (!session) {
+        router.push("/auth");
+      }
+
   return (
     <section className='mb-10' >
-        <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+        <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/homepage' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
                 <h1 className='text-center text-xl font-medium' >Search</h1>
@@ -114,14 +120,14 @@ const SearchPage = () => {
         </div>
 
         {step === 0 && (
-            <div className='flex items-center justify-center mt-10' >
+            <div className='flex items-center justify-center mt-5' >
             <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20 w-full md:w-1/2' >
-            <div className='' >
+            <div className='w-[300px]' >
                         <label className="text-sub_text_2 text-sm mb-3" >Search By Age: </label>
-                        <div className='grid grid-cols-3 items-baseline mt-2' >
+                        <div className='flex justify-between items-baseline mt-2' >
                             <div className='' >
                                 <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupFrom", value)} >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-[115px] h-[50px]" >
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -137,7 +143,7 @@ const SearchPage = () => {
                             </div>
                             <div className='' >
                                 <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupTo", value)} >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-[115px] h-[50px]"  >
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -156,7 +162,7 @@ const SearchPage = () => {
                         <div className="mt-3" >
                                                 {/* <label className="text-sub_text_2 text-sm mb-3" >State: </label> */}
                                                 <div className='mt-2' ><Select  onValueChange={(value) => setValue("state", value)} >
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="w-[300px] h-[50px] rounded-[10px]" >
                                                         <SelectValue placeholder="Select a state" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -179,7 +185,7 @@ const SearchPage = () => {
                                             <label className="text-sub_text_2 text-sm mb-3">Search By Marital Status</label>
                                             <div className='mt-2' >
                                                 <Select onValueChange={(value) => setValue("maritalStatus", value)} >
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="w-[300px] h-[50px] rounded-[10px]">
                                                         <SelectValue placeholder="Select" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -196,7 +202,7 @@ const SearchPage = () => {
                                         <label className="text-sub_text_2 text-sm mb-3">Search By Ethnicity</label>
                                         <div className='mt-2' >
                                         <Select onValueChange={(value) => setValue("ethnicityPreference", value)} >
-                                            <SelectTrigger>
+                                            <SelectTrigger className="w-[300px] h-[50px] rounded-[10px]">
                                                 <SelectValue placeholder="Select" />
                                             </SelectTrigger>
                                             <SelectContent>

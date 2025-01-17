@@ -11,8 +11,11 @@ import NightlightRoundOutlinedIcon from '@mui/icons-material/NightlightRoundOutl
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import AddAPhotoOutlinedIcon from '@mui/icons-material/AddAPhotoOutlined';
 import { useRouter } from 'next/navigation'
+import { ClipLoader } from 'react-spinners'
+import { useSession } from 'next-auth/react'
 
 const AccountMainPage = () => {
+    const { data: session, status } = useSession();
     const [user,setUser] = useState(null)
     const [profilePicture,setProfilePicture] = useState(null);
     const [detailedUser, setDetailedUser] = useState(null)
@@ -20,46 +23,50 @@ const AccountMainPage = () => {
   
     const router = useRouter();
     useEffect(() => {
-      async function extractUser() {
-        const response = await fetch('/api/user/extract-user', {
-          method: 'GET',
-          credentials: 'include', // Include cookies in the request
-        });
-      
-        if (response.status === 200) {
-          const data = await response.json();
-          console.log('User:', data);
-          setUser(data)
-          const responseImage = await axios.get(`/api/user/photos?userId=${data.id}`)
-          if(responseImage.status === 200){
-            setProfilePicture(responseImage.data.profilePhoto)
-          }
-          const responseUser = await axios.get(`/api/user/create-user?userId=${data.id}`)
-          if(responseUser.status === 200){
-            setDetailedUser(responseUser.data);
-            console.log(responseUser.data)
-          }
+      const getUserDetails = async () => {
+        const responseImage = await axios.get(`/api/user/photos?userId=${session.user.id}`)
+        if(responseImage.status === 200){
+          setProfilePicture(responseImage.data.profilePhoto)
+        }
 
-          
-        const responsePersonalDetails = await axios.get(`/api/user/add-personal-details?userId=${data.id}`)
+        const response = await axios.get(`/api/user/create-user?userId=${session.user.id}`);
+            if(response.status === 200){
+                setUser(response.data);
+            }else{
+                console.log(response.data);
+            }
+
+        const responsePersonalDetails = await axios.get(`/api/user/add-personal-details?userId=${session.user.id}`)
         if(responsePersonalDetails.status === 200){
-            setPersonalDetails(responsePersonalDetails.data);
+          setPersonalDetails(responsePersonalDetails.data);
         }
-          
-        } else {
-          console.error('Error:', await response.json());
-        }
+      }  
+
+      if(status === 'authenticated' && session){
+        getUserDetails();
       }
-      extractUser();
       
-    },[])
+      
+    },[status, session])
 
     const handleProfileView = () => {
       router.push('/account/view-profile')
     }
+
+    if (status === "loading") {
+      return (
+        <div className="flex items-center justify-center">
+          <ClipLoader size={50} />
+        </div>
+      );
+    }
+  
+    if (!session) {
+      router.push("/auth");
+    }
   return (
     <section className='mb-10'>
-        <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+        <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/homepage' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
                 <h1 className='text-center text-us_blue text-xl font-semibold' >Account</h1>
@@ -72,18 +79,18 @@ const AccountMainPage = () => {
                     <Image src={profilePicture} className='rounded-md border-2 border-us_blue' alt='profile' height={200} width={150} />
                 )}
                 <div>
-                    <h1 className='text-md text-us_blue font-semibold capitalize' >{detailedUser?.name}</h1>
-                    <p className='text-sm text-sub_text_2 capitalize' >{calculateAge(detailedUser?.dob)} , {personalDetails?.maritalStatus}</p>
-                    <p className="text-sm text-sub_text_2 capitalize" >{detailedUser?.city}</p>
-                    <p className="text-sm text-sub_text_2 capitalize" >{detailedUser?.state}</p>
+                    <h1 className='text-md text-us_blue font-semibold capitalize' >{user?.name}</h1>
+                    <p className='text-sm text-sub_text_2 capitalize' >{user?.age} , {personalDetails?.maritalStatus}</p>
+                    <p className="text-sm text-sub_text_2 capitalize" >{user?.city}</p>
+                    <p className="text-sm text-sub_text_2 capitalize" >{user?.state}</p>
                     <button className='bg-us_blue text-white px-5 py-2 mt-2 rounded-full text-sm' >UPGRADE PLAN</button>
                 </div>
             </div>
 
-            <p className='text-sm text-center mt-5 text-sub_text_2' >User ID : {detailedUser?.id}</p>
+            <p className='text-sm text-center mt-5 text-sub_text_2' >User ID : {session?.user?.id}</p>
 
             <div className='flex items-center justify-center flex-col mt-5 w-full' >
-                <Link href='/account/basic-details' className='mt-5 border border-light_gray flex items-center justify-start px-5 py-3 text-us_blue text-md rounded-md w-full md:w-1/2' >
+                <Link href='/account/basic-details' className='border border-light_gray flex items-center justify-start px-5 py-3 text-us_blue text-md rounded-md w-full md:w-1/2' >
                     <BorderColorOutlinedIcon/>
                     <span className='flex items-center justify-center w-full' >Edit Basic Details</span>
                 </Link>

@@ -11,6 +11,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { ClipLoader } from 'react-spinners';
+import { useSession } from 'next-auth/react';
+import { useAlert } from '@/context/AlertContext';
 
 const generateRelegiousSchema = (gender) => {
     const commonRelegiousSchema = z.object({
@@ -36,47 +38,16 @@ const generateRelegiousSchema = (gender) => {
 };
 
 const ReligiousDetailsEditPage = () => {
+    const { data: session, status } = useSession();
     const [user, setUser] = useState(null);
-    const [schema, setSchema] = useState(null);
-    const [gender, setGender] = useState(null);
+    
+    const gender = session?.user?.gender || "";
+    const schema = generateRelegiousSchema(gender);
+
+    const {showAlert} = useAlert();
+
     const [relegiousDetails, setReligiousDetails] = useState(null);
     const router = useRouter();
-
-    useEffect(() => {
-        async function fetchUser() {
-            const response = await fetch('/api/user/extract-user', {
-                method: 'GET',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setUser(data);
-                setGender(data.gender);
-                const generatedSchema = generateRelegiousSchema(data.gender);
-                setSchema(generatedSchema);
-                fetchReligiousDetails(data.id);
-            } else {
-                console.error('Error:', await response.json());
-            }
-        }
-
-        async function fetchReligiousDetails(userId) {
-            const response = await axios.get(`/api/user/add-relegious-details?userId=${userId}`)
-
-            if (response.status === 200) {
-                console.log(response.data)
-                setReligiousDetails(response.data);
-            } else {
-                console.error('Error fetching religious details:', response.error);
-            }
-        }
-
-        
-        
-
-        fetchUser();
-    }, []);
 
     const {
         register,
@@ -89,29 +60,42 @@ const ReligiousDetailsEditPage = () => {
         resolver: zodResolver(schema),
     });
 
-
     useEffect(() => {
-             if (relegiousDetails) {
-                setValue("religiosity", relegiousDetails?.religiosity || "");
-                setValue("prayer", relegiousDetails?.prayer || "");
-                setValue("revert", relegiousDetails?.revert || "");
-                setValue("revertDuration", relegiousDetails?.revertDuration || "");
-                setValue("mosqueVisit", relegiousDetails?.mosqueVisit || "");
-              if(gender === 'male'){
-                setValue("smoke", relegiousDetails?.smoke || "");
+        const fetchReligiousDetails = async () => {
+          if (status === "authenticated" && session) {
+            try {
+              const response = await axios.get(
+                `/api/user/add-relegious-details?userId=${session.user.id}`
+              );
+    
+              if (response.status === 200) {
+                const data = response.data;
+                setReligiousDetails(data);
+    
+                // Populate form fields
+                setValue("religiosity", data.religiosity || "");
+                setValue("prayer", data.prayer || "");
+                setValue("revert", data.revert || "");
+                setValue("revertDuration", data.revertDuration || "");
+                setValue("mosqueVisit", data.mosqueVisit || "");
+    
+                if (gender === "male") {
+                  setValue("smoke", data.smoke || "");
+                }
+                if (gender === "female") {
+                  setValue("hijab", data.hijab || "");
+                  setValue("considerWearingHijab", data.considerWearingHijab || "");
+                }
               }
-              if(gender === 'female'){
-                setValue("hijab", relegiousDetails?.hijab || "");
-                setValue("considerWearingHijab", relegiousDetails?.considerWearingHijab || "");
-              }
-             }
-      }, [relegiousDetails, setValue, gender]);
+            } catch (error) {
+              console.error("Error fetching religious details:", error);
+            }
+          }
+        };
+    
+        fetchReligiousDetails();
+    }, [status, session, gender, setValue]);
 
-    useEffect(() => {
-        if(schema){
-            reset(relegiousDetails)
-        }
-    },[schema, relegiousDetails, reset])
 
     const onSubmit = async (data) => {
         try {
@@ -119,18 +103,19 @@ const ReligiousDetailsEditPage = () => {
             if (gender === 'male') {
                 response = await axios.put('/api/user/add-relegious-details', {
                     ...data,
-                    userId: user.id,
+                    userId: session.user.id,
                 });
             } else if (gender === 'female') {
                 response = await axios.put('/api/user/add-relegious-details', {
                     ...data,
-                    userId: user.id,
+                    userId: session.user.id,
                 });
             }
 
             if (response.status === 200) {
                 router.push('/account');
             } else {
+                showAlert("Something Went Wrong! Please Try Again")
                 console.log('Error updating details:', response.error);
             }
         } catch (error) {
@@ -138,15 +123,21 @@ const ReligiousDetailsEditPage = () => {
         }
     };
 
-    // if (!relegiousDetails) {
-    //     return <div className='flex items-center justify-center my-auto' >
-    //         <ClipLoader size={40} />
-    //     </div>;
-    // }
+    if (status === "loading") {
+        return (
+          <div className="flex items-center justify-center">
+            <ClipLoader size={50} />
+          </div>
+        );
+      }
+    
+      if (!session) {
+        router.push("/auth");
+    }
 
     return (
         <section className="mb-10">
-            <div className="bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full">
+            <div className="bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full">
                 <Link href="/account">
                     <Image src="/assets/back-icon.svg" alt="backIcon" height={30} width={30} />
                 </Link>
@@ -159,11 +150,11 @@ const ReligiousDetailsEditPage = () => {
                 
 
                 <div className="flex items-center justify-center mt-5">
-                    <form onSubmit={handleSubmit(onSubmit)} className="px-10 md:px-20 w-full md:w-1/2">
-                        <div className="mt-3 grid grid-cols-2 items-baseline">
-                            <label className="text-sub_text_2 text-sm mb-3">Religiosity</label>
+                    <form onSubmit={handleSubmit(onSubmit)} className="px-5 md:px-20 w-full md:w-1/2">
+                        <div className="mt-3 grid grid-cols-3 items-baseline">
+                            <label className="text-sub_text_2 text-sm mb-3 col-span-1">Religiosity:</label>
                             <Select className="text-sub_text_2" onValueChange={(value) => setValue("religiosity", value)} value={watch("religiosity")}>
-                                <SelectTrigger>
+                                <SelectTrigger className="col-span-2 h-[40px]" >
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -175,10 +166,10 @@ const ReligiousDetailsEditPage = () => {
                             {errors.religiosity && <p className="text-red-500 mt-2 text-sm">{errors.religiosity.message}</p>}
                         </div>
 
-                        <div className="mt-5 grid grid-cols-2 items-baseline">
-                            <label className="text-sub_text_2 text-sm mb-3">Your Prayer</label>
+                        <div className="mt-5 grid grid-cols-3 items-baseline">
+                            <label className="text-sub_text_2 text-sm mb-3 col-span-1">Your Prayer</label>
                             <Select className="text-sub_text_2" onValueChange={(value) => setValue('prayer', value)} value={watch("prayer")}>
-                                <SelectTrigger>
+                                <SelectTrigger className="col-span-2 h-[40px]" >
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -204,10 +195,11 @@ const ReligiousDetailsEditPage = () => {
                         </div>
                         {errors.revert && <p className="text-red-500 mt-2 text-sm">{errors.revert.message}</p>}
 
-                        <div className="mt-5 flex items-baseline justify-start gap-3">
+                        <div className='mt-5 flex items-center justify-start gap-5' >
                             <label className="text-sub_text_2 text-sm">If yes, how long?</label>
-                            <div className="input flex items-center justify-center gap-2 mt-1">
-                                <input {...register('revertDuration')} placeholder="" className="w-full" />
+                            <div className="religious-input flex items-center justify-center gap-2 mt-1" >
+                                
+                                <input {...register("revertDuration")} placeholder="" className="w-full"  />
                             </div>
                         </div>
                         {errors.revertDuration && <p className="text-red-500 text-sm mt-2">{errors.revertDuration.message}</p>}
@@ -215,7 +207,7 @@ const ReligiousDetailsEditPage = () => {
                         <div className="mt-5">
                             <label className="text-sub_text_2 text-sm mb-3">How often do you visit the masjid?</label>
                             <Select className="text-sub_text_2 mt-2" onValueChange={(value) => setValue('mosqueVisit', value)} value={watch("mosqueVisit")} >
-                                <SelectTrigger>
+                                <SelectTrigger className="w-full h-[40px] mt-1" >
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -259,13 +251,20 @@ const ReligiousDetailsEditPage = () => {
                                 </div>
                                 {errors.hijab && <p className="text-red-500 mt-2 text-sm">{errors.hijab.message}</p>}
 
-                                <div className="mt-5 flex items-baseline justify-start gap-3">
-                                    <label className="text-sub_text_2 text-sm">Would you like to wear a hijab?</label>
-                                    <div className="input flex items-center justify-center gap-2 mt-1">
-                                        <input {...register('considerWearingHijab')} placeholder="" className="w-full" />
+                                <div className="mt-5" >
+                                    <label className="text-sub_text_2 text-sm mb-3">If no, will you consider wearing it?</label>
+                                    <Select className="text-sub_text_2 mt-2"  onValueChange={(value) => setValue("considerWearingHijab", value)} value={watch("considerWearingHijab")} >
+                                        <SelectTrigger className="h-[40px] mt-1">
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Yes" >Yes</SelectItem>
+                                            <SelectItem value="No" >No</SelectItem>
+                                            <SelectItem value="Maybe" >Maybe</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.considerWearingHijab && <p className="text-red-500 mt-2 text-sm">{errors.considerWearingHijab.message}</p>}
                                     </div>
-                                </div>
-                                {errors.considerWearingHijab && <p className="text-red-500 text-sm mt-2">{errors.considerWearingHijab.message}</p>}
                             </div>
                         )}
 

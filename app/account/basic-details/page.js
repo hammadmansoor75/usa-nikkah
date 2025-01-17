@@ -13,7 +13,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { ClipLoader } from 'react-spinners';
+import { useAlert } from '@/context/AlertContext';
 
 export const basicDetailsSchema = z.object({
   city: z.string().nonempty({ message: "City is required" }),
@@ -36,32 +39,13 @@ const US_STATES = [
    
 
 const BasicDetailsPage = () => {
+
+    const { data: session, status } = useSession();
     
     const [detailedUser, setDetailedUser] = useState(null)
     const router = useRouter();
     
-  
-    useEffect(() => {
-      async function extractUser() {
-        const response = await fetch('/api/user/extract-user', {
-          method: 'GET',
-          credentials: 'include', // Include cookies in the request
-        });
-      
-        if (response.ok) {
-          const data = await response.json();
-          const responseUser = await axios.get(`/api/user/create-user?userId=${data.id}`)
-          if(responseUser.status === 200){
-            setDetailedUser(responseUser.data);
-            console.log(responseUser.data)
-        }
-          
-        } else {
-          console.error('Error:', await response.json());
-        }
-      }
-      extractUser();
-    },[])
+    const {showAlert} = useAlert();
 
     const {
             register,
@@ -74,29 +58,52 @@ const BasicDetailsPage = () => {
     });
 
     useEffect(() => {
-        if (detailedUser) {
-          setValue('city', detailedUser.city || '');
-          setValue('state', detailedUser.state || '');
+
+        const getBasicDetails = async () => {
+            const response = await axios.get(`/api/user/create-user?userId=${session.user.id}`);
+            if(response.status === 200){
+                setDetailedUser(response.data);
+                // console.log(response.data)
+                setValue('city', response.data.city || '');
+                setValue('state', response.data.state || '');
+            }else{
+                console.log(response.data);
+            }
         }
-    }, [detailedUser, setValue]);
+
+        if (status === 'authenticated' && session) {
+          getBasicDetails()
+        }
+    }, [session, status, setValue]);
     
     const onSubmit = async (formData) => {
         const response = await axios.put('/api/user/create-user', {
-            userId : detailedUser?.id,
+            userId : session.user.id,
             city : formData.city,
             state : formData.state
         })
 
         if(response.status === 200){
-            alert("Basic Details Updated!");
             router.push('/account')
         }else{
-            alert("Something went wrong. Please Try Again");
+            showAlert("Something went wrong. Please Try Again");
         }
     }
+
+    if (status === "loading") {
+        return (
+          <div className="flex items-center justify-center">
+            <ClipLoader size={50} />
+          </div>
+        );
+      }
+    
+      if (!session) {
+        router.push("/auth");
+      }
   return (
     <main className='mb-10' >
-        <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+        <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/account' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
                 <h1 className='text-center text-xl font-medium' >Basic Details</h1>
@@ -107,15 +114,11 @@ const BasicDetailsPage = () => {
             <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20' >
                 <div className="input flex items-center justify-center gap-2" >
                     <PersonIcon className="text-sub_text_2"  />
-                    <input disabled value={detailedUser?.name || ""} placeholder="Full Name" className="w-full" />                            
-                </div>
-                <div className="input flex items-center justify-center gap-2 mt-3" >
-                    <PhoneAndroidIcon className="text-sub_text_2"  />
-                    <input value={detailedUser?.phone || ""} disabled placeholder="Mobile Number" className="w-full"  />               
+                    <input disabled value={session?.user?.name || ""} placeholder="Full Name" className="w-full" />                            
                 </div>
                 <div className="input flex items-center justify-center gap-2 mt-3" >
                     <MailLockIcon className="text-sub_text_2"  />
-                    <input disabled value={detailedUser?.email || ""} placeholder="Email" className="w-full"  />            
+                    <input disabled value={session?.user?.email || ""} placeholder="Email" className="w-full"  />            
                 </div>
                 <div className="input-black flex items-center justify-center gap-2 mt-3 border border-black" >
                     <LocationCityIcon className="text-sub_text_2"  />
@@ -125,7 +128,7 @@ const BasicDetailsPage = () => {
 
                 <div className="mt-3" >
                     <Select className="border border-black"  onValueChange={(value) => setValue("state", value)} >
-                        <SelectTrigger className="border border-black" >
+                        <SelectTrigger className="border border-black w-[300px] h-[50px] rounded-[10px]" >
                             <SelectValue placeholder={detailedUser?.state} value={detailedUser?.state || "Select a state"} />
                         </SelectTrigger>
                         <SelectContent>
@@ -140,7 +143,7 @@ const BasicDetailsPage = () => {
                 <div className="mt-3 flex items-center justify-between" >
                     <label className="text-sub_text_2 text-sm" >Gender</label>
                     <RadioGroup
-                        value={detailedUser?.gender || ""}
+                        value={session?.user?.gender || ""}
                         disabled
                         className="flex items-center justify-center gap-2"
                     >
@@ -155,13 +158,13 @@ const BasicDetailsPage = () => {
 
                 <div className="flex items-center justify-between gap-1 mt-3" >
                     <label className="text-sub_text_2 text-sm">Date of Birth </label>
-                    <input disabled value={detailedUser?.dob || ""} type="date" placeholder="DOB" className=""  />
+                    <input disabled value={session?.user?.dob || ""} type="date" placeholder="DOB" className=""  />
                 </div>
 
                 <div className="mt-3" >
                     <label className="text-sub_text_2 text-sm mb-3">Profile Created By</label>
-                    <Select value={detailedUser?.profileCreatedBy || ""} disabled >
-                        <SelectTrigger>
+                    <Select value={session?.user?.profileCreatedBy || ""} disabled >
+                        <SelectTrigger className='w-[300px] h-[50px] mt-1 rounded-[10px]' >
                             <SelectValue placeholder="Select an option" />
                         </SelectTrigger>
                         <SelectContent>

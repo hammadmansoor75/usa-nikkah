@@ -12,9 +12,11 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import ChatIcon from '@mui/icons-material/Chat';
 import { ThumbsUpIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 
 const ShortlistedByProfile = ({profile, removeFromShortlistedByUsers}) => {
+    
     const [profilePhoto, setProfilePhoto] = useState();
 
     const [maritalStatus, setMaritalStatus] = useState();
@@ -27,25 +29,7 @@ const ShortlistedByProfile = ({profile, removeFromShortlistedByUsers}) => {
     const [thumbsDownOpen, setThumbsDownOpen] = useState(false);
     
     
-        useEffect(() => {
-            async function extractUser() {
-              const response = await fetch('/api/user/extract-user', {
-                method: 'GET',
-                credentials: 'include', // Include cookies in the request
-              });
-            
-              if (response.ok) {
-                const data = await response.json();
-                console.log('User:', data);
-                setUser(data)
-                
-              } else {
-                console.error('Error:', await response.json());
-              }
-            }
-            extractUser();
-            
-    },[])
+    const { data: session, status } = useSession();
 
   
 
@@ -81,7 +65,7 @@ const ShortlistedByProfile = ({profile, removeFromShortlistedByUsers}) => {
     const handleThumbsDown = async () => {
         try {
             const response = await axios.post('/api/matching/shortlisted', {
-                loggedInUserId : user.id,
+                loggedInUserId : session.user.id,
                 targetUserId : profile.id
             })
             if(response.status === 200){
@@ -126,7 +110,7 @@ const ShortlistedByProfile = ({profile, removeFromShortlistedByUsers}) => {
                     <button className='bg-us_blue px-2 py-1 rounded-lg flex items-center cursor-pointer justify-center text-white'  >
                         <FavoriteOutlinedIcon className='text-red-500' />
                     </button>
-                    <button className='bg-us_blue flex items-center justify-between gap-2 text-white px-2 py-1 text-sm rounded-lg cursor-pointer' ><ThumbsUpIcon /></button>
+                    <button className='bg-us_blue flex items-center justify-between gap-2 text-white px-2 py-1 text-sm rounded-lg cursor-pointer' ><ThumbUpAltRoundedIcon /></button>
                 </div>
             </div>
         </div>

@@ -39,7 +39,6 @@ export async function GET(req) {
       ...loggedInUser.shortlistedUsers,
       ...loggedInUser.blockedUsers,
       ...loggedInUser.matchedUsers,
-      ...loggedInUser.profileViews,
     ];
 
     // console.log("Logged in Gender", loggedInUser.gender)

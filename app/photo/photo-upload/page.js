@@ -6,13 +6,20 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import ClipLoader from 'react-spinners/ClipLoader'
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useAlert } from '@/context/AlertContext';
+import { ShieldQuestion } from 'lucide-react';
 
 
 
 
 const PhotoUploadPage = () => {
+
+  const { data: session, status } = useSession();
+  const {showAlert} = useAlert();
+
   const [profilePhotoFile, setProfilePhotoFile] = useState(null)
   const [profilePhotoUploadUrl, setProfilePhotoUploadUrl] = useState('')
   const profilePhotoRef = useRef(null)
@@ -35,26 +42,7 @@ const PhotoUploadPage = () => {
   const [selfieCaptureStatus, setSelfieCaptureStatus] = useState(false);
 
   const router = useRouter();
-
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
-          async function extractUser() {
-              const response = await fetch('/api/user/extract-user', {
-                  method: 'GET',
-                  credentials: 'include', // Include cookies in the request
-              });
-                
-              if (response.ok) {
-                  const data = await response.json();
-                  setUser(data);
-                  console.log('User:', data);
-              } else {
-                  console.error('Error:', await response.json());
-              }
-          };
-          extractUser();
-  },[]);
+ 
 
   useEffect(() => {
     // Clean up camera stream when the component is unmounted
@@ -74,7 +62,7 @@ const PhotoUploadPage = () => {
     setProfilePhotoLoading(true);
     const file = e.target.files[0];
     if(!file){
-      alert("No Image Selected!")
+      showAlert("No Image Selected!")
       console.log("No File Selected")
       return;
     }
@@ -84,26 +72,28 @@ const PhotoUploadPage = () => {
     formData.append('upload_preset', 'usa-nikkah');
 
     try {
-      const response = await fetch(`https://api.cloudinary.com/v1_1/dsq7wjcnz/image/upload`, {
+      const cloudinaryURL = `https://api.cloudinary.com/v1_1/dsq7wjcnz/image/upload`
+      const response = await fetch(cloudinaryURL, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok){
         const errorData = await response.json();
-        alert("Something Went wrong while uploading. Please Try Again")
+        showAlert("Something Went wrong while uploading. Please Try Again")
         console.error("Cloudinary Error:", errorData);
         throw new Error("Failed to upload");
       };
       const data = await response.json();
-      setProfilePhotoUploadUrl(data.secure_url);
+      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,w_400,h_400/");
+      setProfilePhotoUploadUrl(faceCroppedURL);
       setProfilePhotoUploadStatus(true);
       console.log(profilePhotoUploadUrl)
-      alert("Profile Photo Uploaded. Dont Leave this page before uploading a selfie otherwise images will be lost")
+      showAlert("Profile Photo Uploaded. Dont Leave this page before uploading a selfie otherwise images will be lost")
     } catch (error) {
       console.error(error)
       console.error('Upload failed:', error.message);
-      alert("Upload Failed. Please Try Again!")
+      showAlert("Upload Failed. Please Try Again!")
     } finally {
       setProfilePhotoLoading(false);
     }
@@ -114,7 +104,7 @@ const PhotoUploadPage = () => {
     if(uploadedPhotos.length < 6 ){
       addPhotoRef.current.click();
     }else{
-      alert("You can upload a maximum of 6 photos")
+      showAlert("You can upload a maximum of 6 photos")
     }
   }
 
@@ -123,7 +113,7 @@ const PhotoUploadPage = () => {
     setPhotoLoading(true)
     const file = e.target.files[0];
     if(!file){
-      alert("NO Image Selected!")
+      showAlert("NO Image Selected!")
       console.log("No File Selected!")
       return;
     }
@@ -133,8 +123,9 @@ const PhotoUploadPage = () => {
     formData.append("upload_preset", "usa-nikkah");
 
     try {
+      const cloudinaryURL = `https://api.cloudinary.com/v1_1/dsq7wjcnz/image/upload`
       const response = await fetch(
-        `https://api.cloudinary.com/v1_1/dsq7wjcnz/image/upload`,
+        cloudinaryURL,
         {
           method: "POST",
           body: formData,
@@ -148,10 +139,11 @@ const PhotoUploadPage = () => {
         throw new Error("Failed to upload");
       }
       const data = await response.json();
-      setUploadedPhotos((prevPhotos) => [...prevPhotos, data.secure_url]);
-      alert("Photo Uploaded. Dont Leave this page before uploading a selfie otherwise images will be lost")
+      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,w_400,h_400/");
+      setUploadedPhotos((prevPhotos) => [...prevPhotos, faceCroppedURL]);
+      showAlert("Photo Uploaded. Dont Leave this page before uploading a selfie otherwise images will be lost")
     } catch (error) {
-      alert("Upload Failed! Please Try Again")
+      showAlert("Upload Failed! Please Try Again")
       console.error("Upload failed:", error.message);
     } finally {
       setPhotoLoading(false);
@@ -171,7 +163,7 @@ const PhotoUploadPage = () => {
       videoRef.current.play();
       
     } catch (error) {
-      alert("Failed to access camera")
+      showAlert("Failed to access camera")
       console.error("Failed to access camera:", error);
     }
   }
@@ -201,7 +193,7 @@ const PhotoUploadPage = () => {
 
   const handleSelfieUpload = async (selfieDataUrl) => {
     if(!selfieDataUrl){
-      alert("Please capture a selfie first")
+      showAlert("Please capture a selfie first")
       return;
     }
 
@@ -210,8 +202,9 @@ const PhotoUploadPage = () => {
     formData.append("upload_preset","usa-nikkah");
 
     try {
+      const cloudinaryURL = `https://api.cloudinary.com/v1_1/dsq7wjcnz/image/upload`
       const response = await fetch(
-        `https://api.cloudinary.com/v1_1/dsq7wjcnz/image/upload`,
+        cloudinaryURL,
         {
           method: "POST",
           body: formData,
@@ -223,12 +216,13 @@ const PhotoUploadPage = () => {
         throw new Error("Failed to upload selfie");
       }
       const data = await response.json();
-      setSelfieUploadUrl(data.secure_url);
+      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,w_400,h_400/");
+      setSelfieUploadUrl(faceCroppedURL);
       setSelfieCaptureStatus(true);
-      alert("Selfie uploaded successfully!");
+      showAlert("Selfie uploaded successfully!");
       
     } catch (error) {
-      alert("Upload Failed! Please Try Again")
+      showAlert("Upload Failed! Please Try Again")
       console.error("Upload failed:", error.message);
     }
   }
@@ -255,11 +249,11 @@ const PhotoUploadPage = () => {
 
   const handleSubmit = async () => {
     if(!profilePhotoUploadStatus){
-      alert("Please upload a profile photo first")
+      showAlert("Please upload a profile photo first")
     }
 
     if(!selfieCaptureStatus){
-      alert("Please upload a selfie first");
+      showAlert("Please upload a selfie first");
     }
 
     try {
@@ -267,25 +261,38 @@ const PhotoUploadPage = () => {
         profilePhoto : profilePhotoUploadUrl,
         selfiePhoto:  selfieUploadUrl,
         photos: uploadedPhotos,
-        userId : user.id
+        userId : session.user.id
       })
       if(response.status === 200){
         console.log(response.data);
         router.push('/homepage')
         
       }else{
-        alert('Something went wrong! Please try again!')
+        showAlert('Something went wrong! Please try again!')
         console.log(response.error)
       }
     } catch (error) {
-      alert('Something went wrong! Please try again!')
+      showAlert('Something went wrong! Please try again!')
       console.log(error);
     }
   }
 
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center">
+        <ClipLoader size={50} />
+      </div>
+    );
+  }
+
+  if (!session) {
+    router.push("/auth");
+  }
+
+
   return (
     <main>
-      <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+      <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
         <Link href='/profile/partner-prefrences' className="cursor-pointer" ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
         <div className='w-full' >
           <h1 className='text-center text-xl font-medium' >Photos</h1>

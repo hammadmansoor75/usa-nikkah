@@ -6,7 +6,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { ClipLoader } from 'react-spinners';
+import { useAlert } from '@/context/AlertContext';
 
 const heights = [
     "Below 4ft",
@@ -70,39 +73,15 @@ const personalDetailsScehma = z.object({
 
 
 const PersonalDetailsPage = () => {
+
+    const {data : session, status} = useSession();
+
     const [user,setUser] = useState(null);
 
     const [personalDetails, setPersonalDetails] = useState(null);
     const [showChildrenLiving, setShowChildrenLiving] = useState(true);
 
-    const router = useRouter();
-    useEffect(() => {
-        async function extractUser() {
-            const response = await fetch('/api/user/extract-user', {
-              method: 'GET',
-              credentials: 'include', // Include cookies in the request
-            });
-          
-            if (response.ok) {
-              const data = await response.json();
-              setUser(data);
-              console.log('User:', data);
-              
-              const userId = data.id
-              const responseUser = await axios.get(`/api/user/add-personal-details?userId=${userId}`)
-              if(responseUser.status === 200){
-                setPersonalDetails(responseUser.data);
-                console.log(responseUser.data)
-            }else{
-                console.log(responseUser);
-            }
-
-            } else {
-              console.error('Error:', await response.json());
-            }
-        };
-        extractUser();
-    }, []);
+    const {showAlert} = useAlert();
 
     const {
         register,
@@ -113,6 +92,37 @@ const PersonalDetailsPage = () => {
       } = useForm({
         resolver: zodResolver(personalDetailsScehma),
     });
+
+    const router = useRouter();
+    useEffect(() => {
+        const getPersonalDetails = async (userId) => {
+            const responseUser = await axios.get(`/api/user/add-personal-details?userId=${userId}`)
+            if(responseUser.status === 200){
+                setPersonalDetails(responseUser.data);
+                console.log(responseUser.data)
+                const data = responseUser.data;
+                setValue("aboutMe", data.aboutMe || "");
+                setValue("height", data.height || "");
+                setValue("maritalStatus", data.maritalStatus || "");
+                setValue("children", data.children || "");
+                setValue("childrenLiving", data.childrenLiving || "");
+                setValue("moreKids", data.moreKids || "");
+                setValue("ethnicBackground", data.ethnicBackground || "");
+                setValue("education", data.education || "");
+                setValue("occupation", data.occupation || "");
+                setValue("hobbies", data.hobbies || "");
+            }else{
+                console.log(responseUser);
+            }
+        }
+
+        if(status === 'authenticated' && session){
+            getPersonalDetails(session.user.id);
+        }
+        
+    }, [setValue,session,status]);
+
+   
 
     const onSubmit = async (data) => {
         try {
@@ -128,13 +138,13 @@ const PersonalDetailsPage = () => {
                     occupation : data.occupation,
                     hobbies : data.hobbies,
                     education : data.education,
-                    userId : user.id
+                    userId : session.user.id
                   })
               
                   if(response.status === 200){
                     router.push('/profile/relegious-details');
                   }else{
-                    alert("Something went wrong")
+                    showAlert("Something went wrong")
                   }
                 
             }else{
@@ -151,35 +161,21 @@ const PersonalDetailsPage = () => {
                     occupation : data.occupation,
                     hobbies : data.hobbies,
                     education : data.education,
-                    userId : user.id
+                    userId : session.user.id
                 });
                 if(response.status === 200){
                     router.push('/profile/relegious-details')
                 }else{
-                    alert("Something went wrong! Please Try Again!")
+                    showAlert("Something went wrong! Please Try Again!")
                     console.log("Something went wrong!")
                 }
             }
         } catch (error) {
-            alert("Something went wrong! Please Try Again!")
+            showAlert("Something went wrong! Please Try Again!")
             console.log(error)
         }
     }
 
-     useEffect(() => {
-             if (personalDetails) {
-              setValue("aboutMe", personalDetails.aboutMe || "");
-              setValue("height", personalDetails.height || "");
-              setValue("maritalStatus", personalDetails.maritalStatus || "");
-              setValue("children", personalDetails.children || "");
-              setValue("childrenLiving", personalDetails.childrenLiving || "");
-              setValue("moreKids", personalDetails.moreKids || "");
-              setValue("ethnicBackground", personalDetails.ethnicBackground || "");
-              setValue("education", personalDetails.education || "");
-              setValue("occupation", personalDetails.occupation || "");
-              setValue("hobbies", personalDetails.hobbies || "");
-             }
-      }, [personalDetails, setValue]);
 
       const selectedChildren = watch("children");
       useEffect(() => {
@@ -188,6 +184,19 @@ const PersonalDetailsPage = () => {
           setValue("childrenLiving", "");
         }
       }, [selectedChildren, setValue]);
+
+
+      
+
+    if(status === 'loading'){
+        return <div className='flex items-center justify-center' >
+            <ClipLoader size={50} />
+        </div>
+    }
+
+    if(!session){
+        router.push('/auth')
+    }
 
 
   return (
@@ -210,7 +219,7 @@ const PersonalDetailsPage = () => {
                 <form onSubmit={handleSubmit(onSubmit)} className='px-5 md:px-20' >
                     <div className='flex flex-col items-start justify-start' >
                         <label className='text-sub_text_2 text-sm' >About Me: No Contact Details Allowed</label>
-                        <textarea className='w-[295px] h-[82px] rounded-md border border-light_gray p-2 mt-2'  {...register("aboutMe")}  />
+                        <textarea className='w-[322px] h-[82px] rounded-md border border-light_gray p-2 mt-2'  {...register("aboutMe")}  />
                         {errors.aboutMe && <p className="text-red-500 mt-2 text-sm">{errors.aboutMe.message}</p>}
                     </div>
                     <div className="mt-3 grid grid-cols-2" >
@@ -334,7 +343,7 @@ const PersonalDetailsPage = () => {
                     
                     <div className='mt-3' >
                         <label className="text-sub_text_2 text-sm">Occupation</label>
-                        <div className="input flex items-center justify-center gap-2 mt-1" >
+                        <div className="custom-input flex items-center justify-center gap-2 mt-1" >
                             
                             <input {...register("occupation")} placeholder="" className="w-full"  />
                         </div>
@@ -343,7 +352,7 @@ const PersonalDetailsPage = () => {
 
                     <div className='mt-3' >
                         <label className="text-sub_text_2 text-sm">Hobbies</label>
-                        <div className="input flex items-center justify-center gap-2 mt-1" >
+                        <div className="custom-input flex items-center justify-center gap-2 mt-1" >
                             
                             <input {...register("hobbies")} placeholder="" className="w-full"  />
                         </div>

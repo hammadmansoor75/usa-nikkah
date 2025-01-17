@@ -8,8 +8,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import axios from 'axios'
+import { useSession } from 'next-auth/react'
+import { ClipLoader } from 'react-spinners'
+import { useAlert } from '@/context/AlertContext'
 
 const ageRange = [
     "18", "19", "20", "21", "22", "23", "24", "25", "26", "27",
@@ -63,45 +66,16 @@ const generatePartnerSchema = (gender) => {
 
   
 const PartnerPrefrencesPage = () => {
-    const [user,setUser] = useState(null);
-    const [schema,setScehma] = useState(null);
-    const [gender,setGender] = useState(null);
+
+    const { data: session, status } = useSession();
+    const {showAlert} = useAlert();
+
+    const gender = session?.user?.gender || "";
+    const schema = generatePartnerSchema(gender);
+    
     const router = useRouter();
 
     const [partnerPrefrences, setPartnerPrefrences] = useState(null);
-     
-    useEffect(() => {
-        async function extractUser() {
-            const response = await fetch('/api/user/extract-user', {
-                method: 'GET',
-                credentials: 'include', // Include cookies in the request
-            });
-              
-            if (response.ok) {
-                const data = await response.json();
-                setUser(data);
-                console.log('User:', data);
-                setGender(data.gender);
-                const generatedSchema = generatePartnerSchema(data.gender)
-                setScehma(generatedSchema);
-                fetchPartnerPreferencs(data.id);
-            } else {
-                console.error('Error:', await response.json());
-            }
-        };
-        async function fetchPartnerPreferencs(userId) {
-            const response = await axios.get(`/api/user/add-partner-prefrence?userId=${userId}`)
-
-            if (response.status === 200) {
-                console.log(response.data)
-                setPartnerPrefrences(response.data);
-            } else {
-                console.log('Error fetching partner preferences:', response.error);
-            }
-        }
-        extractUser();
-    },[]);
-
 
     const {
         register,
@@ -113,26 +87,45 @@ const PartnerPrefrencesPage = () => {
       } = useForm({
         resolver: zodResolver(schema),
     });
-
+     
     useEffect(() => {
-             if (partnerPrefrences) {
-                setValue("ageGroupFrom", partnerPrefrences?.ageGroupFrom || "");
-                setValue("ageGroupTo", partnerPrefrences?.ageGroupTo || "");
-                setValue("state", partnerPrefrences?.state || "");
-                setValue("maritalStatus", partnerPrefrences?.maritalStatus || "");
-                setValue("relegiousPrefrence", partnerPrefrences?.religiousPreference || "");
-                setValue("ethnicityPrefrence", partnerPrefrences?.ethnicityPreference || "");
-                setValue("educationLevel", partnerPrefrences?.educationLevel || "");
-                setValue("work", partnerPrefrences?.work || "");
-                setValue("considerSomeoneHavingChildren", partnerPrefrences?.considerSomeoneHavingChildren || "");
-              if(gender === 'male'){
-                setValue("hijab", partnerPrefrences?.hijab || "");
-              }
-              if(gender === 'female'){
-                setValue("smoke", partnerPrefrences?.smoke || "");
-              }
-             }
-    }, [partnerPrefrences, setValue, gender]);
+        const fetchPartnerPreferencs = async () => {
+            if(status === 'authenticated' && session){
+                try {
+                    const response = await axios.get(`/api/user/add-partner-prefrence?userId=${session?.user?.id}`)
+                    if (response.status === 200) {
+                        const data = response.data;
+                        setPartnerPrefrences(response.data);
+                        setValue("ageGroupFrom", data?.ageGroupFrom || "");
+                        setValue("ageGroupTo", data?.ageGroupTo || "");
+                        setValue("state", data?.state || "");
+                        setValue("maritalStatus", data?.maritalStatus || "");
+                        setValue("relegiousPrefrence", data?.religiousPreference || "");
+                        setValue("ethnicityPrefrence", data?.ethnicityPreference || "");
+                        setValue("educationLevel", data?.educationLevel || "");
+                        setValue("work", data?.work || "");
+                        setValue("considerSomeoneHavingChildren", data?.considerSomeoneHavingChildren || "");
+                        if(gender === 'male'){
+                            setValue("hijab", data?.hijab || "");
+                          }
+                        if(gender === 'female'){
+                            setValue("smoke", data?.smoke || "");
+                        }
+
+                    } else {
+                        console.log('Error fetching partner preferences:', response.data.error);
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        }
+        fetchPartnerPreferencs(session.user.id);
+    },[status, session, gender, setValue]);
+
+
+
+
 
     const onSubmit = async (data) => {
         try {
@@ -141,19 +134,19 @@ const PartnerPrefrencesPage = () => {
                 if (gender === 'male') {
                     response = await axios.put('/api/user/add-partner-prefrence', {
                         ...data,
-                        userId: user.id,
+                        userId: session.user.id,
                     });
                 } else if (gender === 'female') {
                     response = await axios.put('/api/user/add-partner-prefrence', {
                         ...data,
-                        userId: user.id,
+                        userId: session.user.id,
                     });
                 }
 
                 if (response.status === 200) {
                     router.push('/photo/photo-upload')
                 } else {
-                    alert("Something went wrong! Please try again.");
+                    showAlert("Something went wrong! Please try again.");
                     console.log('Error updating details:', response.error);
                 }
             }else{
@@ -171,13 +164,13 @@ const PartnerPrefrencesPage = () => {
                         work : data.work,
                         considerSomeoneHavingChildren : data.considerSomeoneHavingChildren,
                         smoke : data.smoke,
-                        userId : user.id
+                        userId : session.user.id
                     });
                     if(response.status === 200){
                         router.push('/photo/photo-upload')
                         console.log(response.data)
                     }else{
-                        alert("Something went wrong! Please try again.");
+                        showAlert("Something went wrong! Please try again.");
                         console.log(response.error);
                     }
                 }
@@ -195,27 +188,40 @@ const PartnerPrefrencesPage = () => {
                         work : data.work,
                         considerSomeoneHavingChildren : data.considerSomeoneHavingChildren,
                         hijab : data.hijab,
-                        userId : user.id
+                        userId : session.user.id
                     });
                     if(response.status === 200){
                         router.push('/photo/photo-upload')
                         console.log(response.data)
                     }else{
-                        alert("Something went wrong! Please try again.");
+                        showAlert("Something went wrong! Please try again.");
                         console.log(response.error);
                     }
                 }
             }
             
         } catch (error) {
-            alert("Something went wrong! Please try again.");
+            showAlert("Something went wrong! Please try again.");
             console.log(error)
         }
     }
 
+
+    if (status === "loading") {
+        return (
+          <div className="flex items-center justify-center">
+            <ClipLoader size={50} />
+          </div>
+        );
+      }
+    
+      if (!session) {
+        router.push("/auth");
+      }
+
   return (
     <section className="mb-10" >
-        <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+        <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/profile/relegious-details' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
                 <h1 className='text-center text-xl font-medium' >Partner Prefrences</h1>
@@ -231,13 +237,13 @@ const PartnerPrefrencesPage = () => {
             </div>
 
             <div className='flex items-center justify-center mt-5' >
-                <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20 w-full md:w-1/2' >
-                    <div className='' >
+                <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20 w-full md:w-1/2 flex flex-col items-center justify-center' >
+                    <div className='w-[300px]' >
                         <label className="text-sub_text_2 text-sm mb-3" >Age Group: </label>
-                        <div className='grid grid-cols-3 items-baseline mt-2' >
+                        <div className='flex justify-between items-baseline mt-2 w-[300px]' >
                             <div className='' >
                                 <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupFrom", value)} value={watch("ageGroupFrom")}  >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="col-span-1 w-[115px] h-[40px]" >
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -248,12 +254,12 @@ const PartnerPrefrencesPage = () => {
                                 </Select>
                                 {errors.ageGroupFrom && <p className="text-red-500 mt-2 text-sm">{errors.ageGroupFrom.message}</p>}
                             </div>
-                            <div className='flex items-center justify-center' >
+                            <div className='flex items-center justify-center col-span-1' >
                                 <label className="text-sub_text_2 text-sm mb-3 text-center"  >To</label>
                             </div>
                             <div className='' >
                                 <Select className="text-sub_text_2"  onValueChange={(value) => setValue("ageGroupTo", value)} value={watch("ageGroupTo")}  >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="col-span-1 w-[115px] h-[40px]" >
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -271,7 +277,7 @@ const PartnerPrefrencesPage = () => {
                     <div className="mt-3" >
                         <label className="text-sub_text_2 text-sm mb-3" >State: </label>
                         <div className='mt-2' ><Select  onValueChange={(value) => setValue("state", value)} value={watch("state")}  >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[300px] h-[40px]" >
                                 <SelectValue placeholder="Select a state" />
                             </SelectTrigger>
                             <SelectContent>
@@ -285,26 +291,29 @@ const PartnerPrefrencesPage = () => {
 
 
                     <div className="mt-3" >
-                        <label className="text-sub_text_2 text-sm mb-3">Marital Status</label>
-                        <div className='mt-2' >
-                            <Select onValueChange={(value) => setValue("maritalStatus", value)} value={watch("maritalStatus")}  >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="neverMarried" >Never Married</SelectItem>
-                                    <SelectItem value="divorced" >Divorced</SelectItem>
-                                    <SelectItem value="widowed" >Widowed</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        {errors.maritalStatus && <p className="text-red-500 mt-2 text-sm">{errors.maritalStatus.message}</p>}
-                    </div>
+                                        <label className="text-sub_text_2 text-sm mb-3">Marital Status</label>
+                                        <div className='mt-2' >
+                                            <Select onValueChange={(value) => setValue("maritalStatus", value)} value={watch("maritalStatus")} >
+                                                <SelectTrigger className="w-[300px] h-[40px]">
+                                                    <SelectValue placeholder="Select" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="neverMarried" >Never Married</SelectItem>
+                                                    <SelectItem value="divorced" >Divorced</SelectItem>
+                                                    <SelectItem value="widowed" >Widowed</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        {errors.maritalStatus && <p className="text-red-500 mt-2 text-sm">{errors.maritalStatus.message}</p>}
+                                    </div>
+
+
+                    
 
                     <div className="mt-3" >
                         <label className="text-sub_text_2 text-sm mb-3">Relegiousity Prefrence</label>
                         <Select className="text-sub_text_2"  onValueChange={(value) => setValue("relegiousPrefrence", value)} value={watch("relegiousPrefrence")}  >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[300px] h-[40px]">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -322,7 +331,7 @@ const PartnerPrefrencesPage = () => {
                             <label className="text-sub_text_2 text-sm mb-3">Do you prefer a sister who wears the hijab?</label>
                             <div className='mt-2' >
                                 <Select className="text-sub_text_2"  onValueChange={(value) => setValue("hijab", value)} value={watch("hijab")}  >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-[300px] h-[40px]">
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -342,7 +351,7 @@ const PartnerPrefrencesPage = () => {
                             <label className="text-sub_text_2 text-sm mb-3">Would you consider a brother who smokes?</label>
                             <div className='mt-2' >
                                 <Select className="text-sub_text_2"  onValueChange={(value) => setValue("smoke", value)} value={watch("smoke")}  >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-[300px] h-[40px]">
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -360,7 +369,7 @@ const PartnerPrefrencesPage = () => {
                         <label className="text-sub_text_2 text-sm mb-3">Ethnicity Prefrence</label>
                         <div className='mt-2' >
                         <Select onValueChange={(value) => setValue("ethnicityPrefrence", value)} value={watch("ethnicityPrefrence")}  >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[300px] h-[40px]" >
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -386,7 +395,7 @@ const PartnerPrefrencesPage = () => {
                         <label className="text-sub_text_2 text-sm mb-3">Education Level</label>
                         <div className='mt-2' >
                         <Select onValueChange={(value) => setValue("educationLevel", value)} value={watch("educationLevel")}  >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[300px] h-[40px]">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -409,7 +418,7 @@ const PartnerPrefrencesPage = () => {
                         </label>
                         <div className='mt-2' >
                         <Select onValueChange={(value) => setValue("work", value)} value={watch("work")}  >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[300px] h-[40px]">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -429,7 +438,7 @@ const PartnerPrefrencesPage = () => {
                         </label>
                         <div className='mt-2' >
                         <Select onValueChange={(value) => setValue("considerSomeoneHavingChildren", value)} value={watch("considerSomeoneHavingChildren")}  >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[300px] h-[40px]">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>

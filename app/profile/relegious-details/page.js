@@ -10,7 +10,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import axios from 'axios'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { ClipLoader } from 'react-spinners'
+import { useAlert } from '@/context/AlertContext'
 
 
 
@@ -40,147 +43,102 @@ const generateRelegiousSchema = (gender) => {
 }
 
 const RelegiousDetailsPage = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-    const [user,setUser] = useState(null);
-    const [schema,setScehma] = useState(null);
-    const [gender,setGender] = useState(null);
-    const [religiousDetails, setReligiousDetails] = useState(null);
-    const router = useRouter();
- 
-    useEffect(() => {
-        async function extractUser() {
-            const response = await fetch('/api/user/extract-user', {
-              method: 'GET',
-              credentials: 'include', // Include cookies in the request
-            });
-          
-            if (response.ok) {
-              const data = await response.json();
-              setUser(data);
-              console.log('User:', data);
-              setGender(data.gender);
-              const generatedSchema = generateRelegiousSchema(data.gender)
-              setScehma(generatedSchema);
+  const [religiousDetails, setReligiousDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-              const responseReligiousDetails = await axios.get(`/api/user/add-relegious-details?userId=${data.id}`)
-              if (responseReligiousDetails.status === 200) {
-                    console.log(responseReligiousDetails.data);
-                    setReligiousDetails(responseReligiousDetails.data);
-                } else {
-                    console.log(responseReligiousDetails.data);
-                }
-            } else {
-              console.error('Error:', await response.json());
-            }
-        };
-        extractUser();
-    },[])
+  const gender = session?.user?.gender || "";
+  const schema = generateRelegiousSchema(gender);
 
-    // const gender = user.gender;
-    // const schema = generateRelegiousSchema(gender);
+  const {showAlert} = useAlert();
 
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        watch,
-        formState: { errors },
-      } = useForm({
-        resolver: zodResolver(schema),
-    });
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+  });
 
-
-    useEffect(() => {
-        if (religiousDetails) {
-           setValue("religiosity", religiousDetails?.religiosity || "");
-           setValue("prayer", religiousDetails?.prayer || "");
-           setValue("revert", religiousDetails?.revert || "");
-           setValue("revertDuration", religiousDetails?.revertDuration || "");
-           setValue("mosqueVisit", religiousDetails?.mosqueVisit || "");
-         if(gender === 'male'){
-           setValue("smoke", religiousDetails?.smoke || "");
-         }
-         if(gender === 'female'){
-           setValue("hijab", religiousDetails?.hijab || "");
-           setValue("considerWearingHijab", religiousDetails?.considerWearingHijab || "");
-         }
-        }
- }, [religiousDetails, setValue, gender]);
-
-    const onSubmit = async (data) => {
+  useEffect(() => {
+    const fetchReligiousDetails = async () => {
+      if (status === "authenticated" && session) {
         try {
-            if(religiousDetails){
-                let response;
-                if (gender === 'male') {
-                    response = await axios.put('/api/user/add-relegious-details', {
-                        ...data,
-                        userId: user.id,
-                    });
-                } else if (gender === 'female') {
-                    response = await axios.put('/api/user/add-relegious-details', {
-                        ...data,
-                        userId: user.id,
-                    });
-                }
+          const response = await axios.get(
+            `/api/user/add-relegious-details?userId=${session.user.id}`
+          );
 
-                if (response.status === 200) {
-                    router.push('/profile/partner-prefrences');
-                } else {
-                    alert("Something Went Wrong! Please try again!")
-                    console.log('Error updating details:', response.error);
-                }
-            }else{
-                console.log(data);
-                if(gender === 'male'){
-                    const response = await axios.post("/api/user/add-relegious-details", {
-                        religiosity : data.religiosity,
-                        prayer : data.prayer,
-                        revert : data.revert,
-                        revertDuration : data.revertDuration,
-                        mosqueVisit : data.mosqueVisit,
-                        smoke : data.smoke,
-                        userId : user.id
-                    });
-                    if(response.status === 200){
-                        router.push('/profile/partner-prefrences')
-                    }else{
-                        alert("Something Went Wrong! Please try again!")
-                        console.log(response.error);
-                    }
-                }
+          if (response.status === 200) {
+            const data = response.data;
+            setReligiousDetails(data);
 
-                if(gender === 'female'){
-                    const response = await axios.post("/api/user/add-relegious-details", {
-                        religiosity : data.religiosity,
-                        prayer : data.prayer,
-                        revert : data.revert,
-                        revertDuration : data.revertDuration,
-                        mosqueVisit : data.mosqueVisit,
-                        hijab : data.hijab,
-                        considerWearingHijab : data.considerWearingHijab,
-                        userId : user.id
-                    });
-                    if(response.status === 200){
-                        router.push('/profile/partner-prefrences')
-                    }else{
-                        alert("Something Went Wrong! Please try again!")
-                        console.log(response.error);
-                    }
-                }
+            // Populate form fields
+            setValue("religiosity", data.religiosity || "");
+            setValue("prayer", data.prayer || "");
+            setValue("revert", data.revert || "");
+            setValue("revertDuration", data.revertDuration || "");
+            setValue("mosqueVisit", data.mosqueVisit || "");
+
+            if (gender === "male") {
+              setValue("smoke", data.smoke || "");
             }
-            
+            if (gender === "female") {
+              setValue("hijab", data.hijab || "");
+              setValue("considerWearingHijab", data.considerWearingHijab || "");
+            }
+          }
         } catch (error) {
-            alert("Something Went Wrong! Please try again!")
-            console.log(error)
+          console.error("Error fetching religious details:", error);
         }
-    }
+      }
+      setLoading(false);
+    };
 
+    fetchReligiousDetails();
+  }, [status, session, gender, setValue]);
+
+  const onSubmit = async (data) => {
+    try {
+      const apiEndpoint = "/api/user/add-relegious-details";
+      const payload = { ...data, userId: session.user.id };
+
+      const response = religiousDetails
+        ? await axios.put(apiEndpoint, payload)
+        : await axios.post(apiEndpoint, payload);
+
+      if (response.status === 200) {
+        router.push("/profile/partner-prefrences");
+      } else {
+        alert("Something went wrong! Please try again.");
+        console.log(response.error);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong! Please try again.");
+    }
+  };
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center">
+        <ClipLoader size={50} />
+      </div>
+    );
+  }
+
+  if (!session) {
+    router.push("/auth");
+  }
 
 
 
   return (
     <section className='mb-10' >
-        <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
+        <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/profile/personal-details' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
                 <h1 className='text-center text-xl font-medium' >Relegious Details</h1>
@@ -197,10 +155,10 @@ const RelegiousDetailsPage = () => {
 
             <div className='flex items-center justify-center mt-5' >
                 <form onSubmit={handleSubmit(onSubmit)} className='px-10 md:px-20 w-full md:w-1/2' >
-                    <div className="mt-3 grid grid-cols-2 items-baseline" >
-                        <label className="text-sub_text_2 text-sm mb-3">Religiosity</label>
+                    <div className="mt-3 grid grid-cols-3 items-baseline" >
+                        <label className="text-sub_text_2 text-sm mb-3 col-span-1">Religiosity:</label>
                         <Select className="text-sub_text_2"  onValueChange={(value) => setValue("religiosity", value)} value={watch("religiosity")} >
-                            <SelectTrigger>
+                            <SelectTrigger className="col-span-2 h-[40px]" >
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -212,10 +170,10 @@ const RelegiousDetailsPage = () => {
                         {errors.religiosity && <p className="text-red-500 mt-2 text-sm">{errors.religiosity.message}</p>}
                     </div>
 
-                    <div className="mt-5 grid grid-cols-2 items-baseline" >
-                        <label className="text-sub_text_2 text-sm mb-3">Your Prayer</label>
+                    <div className="mt-5 grid grid-cols-3 items-baseline" >
+                        <label className="text-sub_text_2 text-sm mb-3 col-span-1">Your Prayer</label>
                         <Select className="text-sub_text_2"  onValueChange={(value) => setValue("prayer", value)} value={watch("prayer")} >
-                            <SelectTrigger>
+                            <SelectTrigger className="col-span-2 h-[40px]" >
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -247,9 +205,9 @@ const RelegiousDetailsPage = () => {
                     </div>
                     {errors.revert && <p className="text-red-500 mt-2 text-sm">{errors.revert.message}</p>}
 
-                    <div className='mt-5 flex items-baseline justify-start gap-3' >
+                    <div className='mt-5 flex items-baseline justify-start gap-5' >
                         <label className="text-sub_text_2 text-sm">If yes, how long?</label>
-                        <div className="input flex items-center justify-center gap-2 mt-1" >
+                        <div className="religious-input flex items-center justify-center gap-2 mt-1" >
                             
                             <input {...register("revertDuration")} placeholder="" className="w-full"  />
                         </div>
@@ -259,7 +217,7 @@ const RelegiousDetailsPage = () => {
                     <div className="mt-5" >
                         <label className="text-sub_text_2 text-sm mb-3">How often do you visit the masjid?</label>
                         <Select className="text-sub_text_2 mt-2"  onValueChange={(value) => setValue("mosqueVisit", value)} value={watch("mosqueVisit")} >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-[300px] h-[40px] mt-1" >
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
@@ -318,7 +276,7 @@ const RelegiousDetailsPage = () => {
                             <div className="mt-5" >
                                 <label className="text-sub_text_2 text-sm mb-3">If no, will you consider wearing it?</label>
                                 <Select className="text-sub_text_2 mt-2"  onValueChange={(value) => setValue("considerWearingHijab", value)} value={watch("considerWearingHijab")} >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-[300px] h-[40px] mt-1">
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
                                     <SelectContent>

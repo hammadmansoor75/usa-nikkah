@@ -11,10 +11,12 @@ import ThumbDownRoundedIcon from '@mui/icons-material/ThumbDownRounded';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 
 const MatchedProfile = ({profile, removeFromMatchedUsers}) => {
     const [profilePhoto, setProfilePhoto] = useState();
+    const { data: session, status } = useSession();
 
     const [maritalStatus, setMaritalStatus] = useState();
 
@@ -27,28 +29,6 @@ const MatchedProfile = ({profile, removeFromMatchedUsers}) => {
 
     const router = useRouter();
     
-    
-        useEffect(() => {
-            async function extractUser() {
-              const response = await fetch('/api/user/extract-user', {
-                method: 'GET',
-                credentials: 'include', // Include cookies in the request
-              });
-            
-              if (response.ok) {
-                const data = await response.json();
-                console.log('User:', data);
-                setUser(data)
-                
-              } else {
-                console.error('Error:', await response.json());
-              }
-            }
-            extractUser();
-            
-    },[])
-
-  
 
     useEffect(() => {
         const fetchProfilePhoto = async () => {
@@ -83,7 +63,7 @@ const MatchedProfile = ({profile, removeFromMatchedUsers}) => {
         try{
             const response = await axios.delete('/api/matching/matched-users', {
                 data : {
-                    loggedInUserId : user.id,
+                    loggedInUserId : session.user.id,
                     targetUserId : profile.id
                 }
             })

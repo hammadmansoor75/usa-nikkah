@@ -11,31 +11,10 @@ export async function POST(req) {
       );
     }
 
-    // Fetch the logged-in user
-    const loggedInUser = await prisma.user.findUnique({
-      where: { id: loggedInUserId },
-      select: { shortlistedUsers: true },
-    });
-
-    if (!loggedInUser) {
-      return new Response(
-        JSON.stringify({ error: "Logged-in user not found" }),
-        { status: 404 }
-      );
-    }
-
-    // Check if the target user is already in the logged-in user's shortlistedUsers array
-    if (loggedInUser.shortlistedUsers.includes(targetUserId)) {
-      return new Response(
-        JSON.stringify({ error: "User is already shortlisted" }),
-        { status: 400 }
-      );
-    }
-
-    // Fetch the target user
+    // Check if the logged-in user is already shortlisted by the target user
     const targetUser = await prisma.user.findUnique({
       where: { id: targetUserId },
-      select: { shortlistedBy: true },
+      select: { prospectiveMatch: true },
     });
 
     if (!targetUser) {
@@ -45,47 +24,57 @@ export async function POST(req) {
       );
     }
 
-    // Check if the logged-in user is already in the target user's shortlistedBy array
-    if (targetUser.shortlistedBy.includes(loggedInUserId)) {
+    const isSelectedByTarget = targetUser.prospectiveMatch.includes(loggedInUserId);
+
+    if (isSelectedByTarget) {
+      // Add each user to the other's matchedUsers
+      const [updatedLoggedInUser, updatedTargetUser] = await Promise.all([
+        prisma.user.update({
+          where: { id: loggedInUserId },
+          data: {
+            matchedUsers: {
+              push: targetUserId, // Add target user to logged-in user's matchedUsers
+            },
+          },
+        }),
+        prisma.user.update({
+          where: { id: targetUserId },
+          data: {
+            matchedUsers: {
+              push: loggedInUserId, // Add logged-in user to target user's matchedUsers
+            },
+          },
+        }),
+      ]);
+
       return new Response(
-        JSON.stringify({ error: "You are already in the target user's shortlistedBy list" }),
-        { status: 400 }
+        JSON.stringify({ message: "Users matched!", updatedLoggedInUser, updatedTargetUser }),
+        { status: 201 }
       );
     }
 
-    // Update the logged-in user's shortlistedUsers array
-    const updatedLoggedInUser = await prisma.user.update({
+    // If not shortlisted by the target user, add to shortlistedUsers
+    const updatedUser = await prisma.user.update({
       where: { id: loggedInUserId },
       data: {
-        shortlistedUsers: { push: targetUserId },
-      },
-    });
-
-    // Update the target user's shortlistedBy array
-    const updatedTargetUser = await prisma.user.update({
-      where: { id: targetUserId },
-      data: {
-        shortlistedBy: { push: loggedInUserId },
+        prospectiveMatch: {
+          push: targetUserId, // Add the target user to the shortlistedUsers array
+        },
       },
     });
 
     return new Response(
-      JSON.stringify({
-        message: "User shortlisted successfully",
-        updatedLoggedInUser,
-        updatedTargetUser,
-      }),
+      JSON.stringify({ message: "User Selected For A Match", updatedUser }),
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error adding user to shortlisted:", error);
+    console.error("Error adding user to Prospective Match:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500 }
     );
   }
 }
-
 
 
 
@@ -106,7 +95,7 @@ export async function GET(req) {
     const loggedInUser = await prisma.user.findUnique({
       where: { id: userId },
       select: {
-        shortlistedUsers: true, // Only fetch shortlistedUsers
+        prospectiveMatch: true, // Only fetch shortlistedUsers
       },
     });
 
@@ -118,18 +107,18 @@ export async function GET(req) {
     }
 
     // Fetch the details of the shortlisted users
-    const shortlistedUsers = await prisma.user.findMany({
+    const prospectiveMatchUsers = await prisma.user.findMany({
       where: {
-        id: { in: loggedInUser.shortlistedUsers }, // Find users with IDs in shortlistedUsers
+        id: { in: loggedInUser.prospectiveMatch }, // Find users with IDs in shortlistedUsers
       },
     });
 
     return new Response(
-      JSON.stringify({ shortlistedUsers }),
+      JSON.stringify({ prospectiveMatchUsers }),
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error fetching shortlisted users:', error);
+    console.error('Error fetching Prospective Match users:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500 }
@@ -152,7 +141,7 @@ export async function DELETE(req) {
       // Remove the target user from the logged-in user's shortlistedUsers list
       const loggedInUser = await prisma.user.findUnique({
         where: { id: loggedInUserId },
-        select: { shortlistedUsers: true },
+        select: { prospectiveMatch: true },
       });
       
       if (!loggedInUser) {
@@ -160,13 +149,13 @@ export async function DELETE(req) {
       }
       
       // Remove the targetUserId from the list
-      const updatedShortlistedUsers = loggedInUser.shortlistedUsers.filter(
+      const updatedShortlistedUsers = loggedInUser.prospectiveMatch.filter(
         (userId) => userId !== targetUserId
       );
       
       const updatedUser = await prisma.user.update({
         where: { id: loggedInUserId },
-        data: { shortlistedUsers: { set: updatedShortlistedUsers } },
+        data: { prospectiveMatch: { set: updatedShortlistedUsers } },
       });
       
   
@@ -175,7 +164,7 @@ export async function DELETE(req) {
         { status: 200 }
       );
     } catch (error) {
-      console.error('Error removing user from shortlisted:', error);
+      console.error('Error removing user from prospective match:', error);
       return new Response(
         JSON.stringify({ error: 'Internal server error' }),
         { status: 500 }
