@@ -15,6 +15,31 @@ import { ClipLoader } from 'react-spinners';
 import { useAlert } from '@/context/AlertContext';
 
  
+const personalDetailsScehma = z.object({
+    aboutMe: z.string().nonempty({ message: "About Me is required" }).refine((value) => {
+        // Banned words
+        const bannedWords = ["aol", "gmail", "yahoo", "live", "msn", "fb", "instagram", "tiktok"];
+        const containsBannedWords = bannedWords.some((word) => value.toLowerCase().includes(word));
+    
+        // Check for numbers, @, or banned words
+        const containsNumbersOrSpecialChars = /[0-9@]/.test(value);
+    
+        return !containsBannedWords && !containsNumbersOrSpecialChars;
+    }, {
+        message: "About Me must not include numbers, email addresses, '@', or banned words like AOL, Gmail, etc.",
+    }),
+    height : z.string().nonempty({ message: "Height is required" }),
+    maritalStatus : z.string().nonempty({ message: "Marital Status is required" }),
+    children : z.string().nonempty({ message: "No of Children is required" }),
+    childrenLiving : z.string().optional(),
+    moreKids : z.string().nonempty({ message: "Want More Kids is required" }),
+    ethnicBackground : z.string().nonempty({ message: "Ethnic Background is required" }),
+    occupation : z.string().nonempty({ message: "Occupation is required" }).refine((value) => /^[A-Za-z\s]+$/.test(value), {
+        message: "Occupation must only contain letters and spaces",
+      }),
+    hobbies : z.string().nonempty({ message: "Hobbies is required" }),
+    education : z.string().nonempty({message : "Education is required"})
+})
 
 const PersonalDetailsPage = () => {
 
