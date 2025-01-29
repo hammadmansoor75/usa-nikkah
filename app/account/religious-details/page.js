@@ -142,7 +142,7 @@ const ReligiousDetailsEditPage = () => {
                     <Image src="/assets/back-icon.svg" alt="backIcon" height={30} width={30} />
                 </Link>
                 <div className="w-full">
-                    <h1 className="text-center text-xl font-medium">Edit Religious Details</h1>
+                    <h1 className="text-center text-xl font-semibold text-us_blue">Religious Details</h1>
                 </div>
             </div>
 
@@ -158,7 +158,7 @@ const ReligiousDetailsEditPage = () => {
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Relegious">Religious</SelectItem>
+                                    <SelectItem value="Religious">Religious</SelectItem>
                                     <SelectItem value="Moderate">Moderate</SelectItem>
                                     <SelectItem value="Liberal">Liberal</SelectItem>
                                 </SelectContent>

@@ -106,7 +106,7 @@ const BasicDetailsPage = () => {
         <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/account' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
-                <h1 className='text-center text-xl font-medium' >Basic Details</h1>
+                <h1 className='text-center text-xl font-semibold text-us_blue' >Basic Details</h1>
             </div>
         </div>
 

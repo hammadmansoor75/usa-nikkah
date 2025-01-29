@@ -52,7 +52,7 @@ export async function GET(req) {
 
 export async function PUT(req) {
     try {
-        const { photos, userId } = await req.json();
+        const { photos, userId,profilePhoto,selfiePhoto } = await req.json();
 
         if (!userId) {
             return NextResponse.json({ error: "User ID is required" }, { status: 400 });
@@ -62,6 +62,8 @@ export async function PUT(req) {
             where: { userId },
             data: {
                 photos,
+                profilePhoto,
+                selfiePhoto
             },
         });
 

@@ -105,7 +105,7 @@ const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
             </div>
             <div className='flex items-start justify-start flex-col' >
                     <div>
-                        <h3 className='text-sm text-us_blue font-medium' >{profile.name}</h3>
+                        <h3 className='text-sm text-us_blue font-medium capitalize' >{profile.name}</h3>
                         <p className='text-xs text-dark_text capitalize' >{calculateAge(profile.dob)} , {maritalStatus}</p>
                         <p className='text-xs text-dark_text capitalize' >{profile.city} , {profile.state}</p>
                     </div>

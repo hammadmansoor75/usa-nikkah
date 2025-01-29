@@ -60,7 +60,7 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Navbar */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-us_red text-white shadow-inner border-t border-gray-700 h-[56px]">
+      <nav className="sm:hidden fixed bottom-0 z-10 left-0 right-0 bg-us_red text-white shadow-inner border-t border-gray-700 h-[56px]">
         <ul className="flex justify-around items-center py-4">
           {navItems.map((item) => (
             <li key={item.name}>

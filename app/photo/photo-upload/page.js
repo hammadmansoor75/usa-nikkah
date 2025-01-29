@@ -21,7 +21,7 @@ const PhotoUploadPage = () => {
   const {showAlert} = useAlert();
 
   const [profilePhotoFile, setProfilePhotoFile] = useState(null)
-  const [profilePhotoUploadUrl, setProfilePhotoUploadUrl] = useState('')
+  const [profilePhotoUploadUrl, setProfilePhotoUploadUrl] = useState(null)
   const profilePhotoRef = useRef(null)
   const [profilePhotoLoading, setProfilePhotoLoading] = useState(false);
   const [profilePhotoUploadStatus, setProfilePhotoUploadStatus] = useState(false);
@@ -42,6 +42,28 @@ const PhotoUploadPage = () => {
   const [selfieCaptureStatus, setSelfieCaptureStatus] = useState(false);
 
   const router = useRouter();
+
+
+  const [alreadyExists, setAlreadyExists] = useState(false);
+
+  useEffect(() => {
+    async function fetchImages(userId) {
+      const response = await axios.get(`/api/user/photos?userId=${userId}`)
+
+      if (response.status === 200) {
+          setProfilePhotoUploadUrl(response.data.profilePhoto);
+          setUploadedPhotos(response.data.photos);
+          setAlreadyExists(true)
+      } else {
+          console.error('Error fetching Images:', response.error);
+      }
+  }
+
+  if(status === 'authenticated' && session){
+    fetchImages(session.user.id);
+  }
+
+  }, [status, session]);
  
 
   useEffect(() => {
@@ -85,7 +107,7 @@ const PhotoUploadPage = () => {
         throw new Error("Failed to upload");
       };
       const data = await response.json();
-      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,w_400,h_400/");
+      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,ar_1:1,q_auto,f_auto/");
       setProfilePhotoUploadUrl(faceCroppedURL);
       setProfilePhotoUploadStatus(true);
       console.log(profilePhotoUploadUrl)
@@ -110,46 +132,49 @@ const PhotoUploadPage = () => {
 
 
   const handlePhotoUpload = async (e) => {
-    setPhotoLoading(true)
-    const file = e.target.files[0];
-    if(!file){
-      showAlert("NO Image Selected!")
-      console.log("No File Selected!")
+    setPhotoLoading(true);
+    const files = Array.from(e.target.files); // Allow multiple files
+  
+    if (!files.length) {
+      showAlert("No images selected!");
       return;
     }
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "usa-nikkah");
-
+  
+    const totalFiles = uploadedPhotos.length + files.length;
+    if (totalFiles > 6) {
+      showAlert(`You can only upload a maximum of 6 photos.`);
+      setPhotoLoading(false);
+      return;
+    }
+  
     try {
-      const cloudinaryURL = `https://api.cloudinary.com/v1_1/dsq7wjcnz/image/upload`
-      const response = await fetch(
-        cloudinaryURL,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Cloudinary Error:", errorData);
-        alert("Something went wrong while uploading the photo")
-        throw new Error("Failed to upload");
-      }
-      const data = await response.json();
-      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,w_400,h_400/");
-      setUploadedPhotos((prevPhotos) => [...prevPhotos, faceCroppedURL]);
-      showAlert("Photo Uploaded. Dont Leave this page before uploading a selfie otherwise images will be lost")
+      const cloudinaryURL = `https://api.cloudinary.com/v1_1/dsq7wjcnz/image/upload`;
+      const uploadPromises = files.map((file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "usa-nikkah");
+  
+        return fetch(cloudinaryURL, { method: "POST", body: formData })
+          .then((response) => response.json())
+          .then((data) => {
+            const faceCroppedURL = data.secure_url.replace(
+              "/upload/",
+              "/upload/c_crop,g_face,ar_1:1,q_auto,f_auto/"
+            );
+            return faceCroppedURL;
+          });
+      });
+  
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setUploadedPhotos((prevPhotos) => [...prevPhotos, ...uploadedUrls]);
+      showAlert("Photos uploaded successfully!");
     } catch (error) {
-      showAlert("Upload Failed! Please Try Again")
-      console.error("Upload failed:", error.message);
+      showAlert("Upload failed! Please try again.");
+      console.error("Upload error:", error.message);
     } finally {
       setPhotoLoading(false);
     }
-  }
-
+  };
 
   const startSelfieCapture = async () => {
     try {
@@ -216,7 +241,7 @@ const PhotoUploadPage = () => {
         throw new Error("Failed to upload selfie");
       }
       const data = await response.json();
-      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,w_400,h_400/");
+      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,ar_1:1,q_auto,f_auto/");
       setSelfieUploadUrl(faceCroppedURL);
       setSelfieCaptureStatus(true);
       showAlert("Selfie uploaded successfully!");
@@ -248,34 +273,53 @@ const PhotoUploadPage = () => {
 
 
   const handleSubmit = async () => {
-    if(!profilePhotoUploadStatus){
-      showAlert("Please upload a profile photo first")
-    }
+    
 
     if(!selfieCaptureStatus){
       showAlert("Please upload a selfie first");
     }
 
     try {
-      const response = await axios.post('/api/user/photos', {
-        profilePhoto : profilePhotoUploadUrl,
-        selfiePhoto:  selfieUploadUrl,
-        photos: uploadedPhotos,
-        userId : session.user.id
-      })
-      if(response.status === 200){
-        console.log(response.data);
-        router.push('/homepage')
-        
+      if(alreadyExists){
+        const response = await axios.put('/api/user/photos', {
+          profilePhoto : profilePhotoUploadUrl,
+          selfiePhoto:  selfieUploadUrl,
+          photos: uploadedPhotos,
+          userId : session?.user?.id
+        })
+        if(response.status === 200){
+          console.log(response.data);
+          router.push('/account')
+          
+        }else{
+          showAlert('Something went wrong! Please try again!')
+          console.log(response.error)
+        }
       }else{
-        showAlert('Something went wrong! Please try again!')
-        console.log(response.error)
+        const response = await axios.post('/api/user/photos', {
+          profilePhoto : profilePhotoUploadUrl,
+          selfiePhoto:  selfieUploadUrl,
+          photos: uploadedPhotos,
+          userId : session.user.id
+        })
+        if(response.status === 200){
+          console.log(response.data);
+          router.push('/account')
+          
+        }else{
+          showAlert('Something went wrong! Please try again!')
+          console.log(response.error)
+        }
       }
     } catch (error) {
       showAlert('Something went wrong! Please try again!')
       console.log(error);
     }
   }
+
+  const handleRemovePhoto = (index) => {
+    setUploadedPhotos((prevPhotos) => prevPhotos.filter((_, i) => i !== index));
+  };
 
   if (status === "loading") {
     return (
@@ -294,8 +338,8 @@ const PhotoUploadPage = () => {
     <main>
       <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
         <Link href='/profile/partner-prefrences' className="cursor-pointer" ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
-        <div className='w-full' >
-          <h1 className='text-center text-xl font-medium' >Photos</h1>
+        <div className='flex items-center justify-center w-full' >
+          <h1 className='text-center text-xl font-semibold text-us_blue tracking-wide' >Photos</h1>
         </div>
       </div>
 
@@ -307,10 +351,9 @@ const PhotoUploadPage = () => {
             <p className='text-sm text-sub_text_2' >Your real photos only to prevent spam and make sure you’re genuine. You can’t change profile photo after selfie verification.</p>
           </div>
           <div>
-            <div className='w-[80px] h-[80px] bg-sub_text_2 rounded-md flex items-center justify-center' >
+            <div className='w-[80px] h-[80px] bg-sub_text_2 bg-opacity-50 rounded-md flex items-center justify-center' >
               {profilePhotoLoading ? <ClipLoader />
-              : profilePhotoUploadStatus ? <Image className='rounded-md' src={profilePhotoUploadUrl} alt='profile' height={100} width={100}  objectFit='contain' layout='intrinsic'/>  : <div><input type="file" ref={profilePhotoRef} onChange={handleProfilePhotoChange} className='hidden' />
-              <AccountCircleOutlinedIcon onClick={handleProfileIconClick} className='text-white' sx={{ fontSize: 70 }}  /></div>  
+              : profilePhotoUploadUrl ? <Image className='rounded-md' src={profilePhotoUploadUrl} alt='profile' height={100} width={100}  objectFit='contain' layout='intrinsic'/>  : <div className='' ><input type="file" ref={profilePhotoRef} onChange={handleProfilePhotoChange} className='hidden' /><div className='relative flex items-center justify-center' ><AccountCircleOutlinedIcon onClick={handleProfileIconClick} className='opacity-50 text-white flex items-center justify-center' sx={{ fontSize: 70 }} ></AccountCircleOutlinedIcon > <AddCircleOutlinedIcon onClick={handleProfileIconClick} className='absolute' /></div></div>  
               }
             </div>
           </div>
@@ -320,8 +363,9 @@ const PhotoUploadPage = () => {
           <p className='text-sub_text_2 text-sm' >Add upto 6 photos</p>
           <div className='mt-5 flex items-center justify-center flex-wrap gap-5' >
             {uploadedPhotos.map((photo, index) => (
-              <div key={index} className='bg-light_gray w-[100px] h-[100px] rounded-md flex items-center justify-center overflow-hidden'>
+              <div key={index} className='bg-light_gray w-[100px] h-[100px] rounded-md flex items-center justify-center overflow-hidden relative'>
                 <Image src={photo} alt='photo' className='rounded-md' width={100} height={100} objectFit='contain' layout='intrinsic' />
+                <button className='absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 font-bold rounded-full' onClick={() => handleRemovePhoto(index)}>X</button>
               </div>
             ))}
             {uploadedPhotos.length < 6 && (
@@ -329,13 +373,13 @@ const PhotoUploadPage = () => {
                 {photoLoading ? <ClipLoader /> : <AddCircleOutlinedIcon/> }
               </div>
             )}
-            <input type='file' ref={addPhotoRef} onChange={handlePhotoUpload} className='hidden' />
+            <input type='file' ref={addPhotoRef} multiple accept='image/*' onChange={handlePhotoUpload} className='hidden' />
           </div>
         </div>
 
 
-        <div className='mt-5'>
-          <h2 className='text-us_red text-xl text-center font-semibold' >Selfie Verification</h2>
+        <div className='mt-10'>
+          <h2 className='text-us_red text-xl text-center font-bold tracking-wider' >Selfie Verification</h2>
 
           <p className='text-sm text-sub_text_2 mt-5' >We need to verify that it’s you in the pictures
           above. Please take a selfie below. Your profile will remain hidden until you verify yourself. May Allah SWT make it possible for you to find your partner here. Ameeen.</p>
@@ -349,15 +393,27 @@ const PhotoUploadPage = () => {
 
           
 
-          <div className='mt-5' >
-            {selfieCaptureStatus ? <div className='flex items-center justify-center' ><button className='blue-button' onClick={handleSubmit} >Done</button></div> : <div className='flex items-center justify-center flex-col gap-5'>
-              <button className='blue-button' id='captureSelfieBtn' onClick={startSelfieCapture} >Start Camera</button>
-            <button className="blue-button" onClick={captureSelfie}>
-              Capture Selfie
-            </button>
-            </div> }
-            
-          </div>
+
+<div className="mt-5">
+  {selfieCaptureStatus ? (
+    <div className="flex items-center justify-center">
+      <button className="blue-button" onClick={handleSubmit}>Done</button>
+    </div>
+  ) : (
+    <div className="flex items-center justify-center flex-col gap-5">
+      {!startVideo && (
+        <button className="blue-button" id="startCameraBtn" onClick={startSelfieCapture}>
+          Start Camera
+        </button>
+      )}
+      {startVideo && !endVideo && (
+        <button className="blue-button" id="captureSelfieBtn" onClick={captureSelfie}>
+          Capture Selfie
+        </button>
+      )}
+    </div>
+  )}
+</div>
         </div>
 
       </div>

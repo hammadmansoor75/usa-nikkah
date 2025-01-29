@@ -164,7 +164,7 @@ const PartnerPreferencesEditPage = () => {
     <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
         <Link href='/account' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
         <div className='w-full' >
-            <h1 className='text-center text-xl font-medium' >Edit Partner Prefrences</h1>
+            <h1 className='text-center text-xl  font-semibold text-us_blue' >Partner Preferences</h1>
         </div>
     </div>
 
@@ -232,9 +232,9 @@ const PartnerPreferencesEditPage = () => {
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="neverMarried" >Never Married</SelectItem>
-                                <SelectItem value="divorced" >Divorced</SelectItem>
-                                <SelectItem value="widowed" >Widowed</SelectItem>
+                                <SelectItem value="Never Married" >Never Married</SelectItem>
+                                <SelectItem value="Divorced" >Divorced</SelectItem>
+                                <SelectItem value="Widowed" >Widowed</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -248,7 +248,7 @@ const PartnerPreferencesEditPage = () => {
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Relegious" >Relegious</SelectItem>
+                            <SelectItem value="Religious" >Relegious</SelectItem>
                             <SelectItem value="Moderate" >Moderate</SelectItem>
                             <SelectItem value="Liberal" >Liberal</SelectItem>
                             <SelectItem value="Dont Matter" >Dont Matter</SelectItem>
@@ -304,17 +304,17 @@ const PartnerPreferencesEditPage = () => {
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="african" >African</SelectItem>
-                            <SelectItem value="african american" >African American</SelectItem>
-                            <SelectItem value="desi/south-asian" >Desi / South Asian</SelectItem>
-                            <SelectItem value="arab/middle-eastren" >Arab / Middle Eastren</SelectItem>
-                            <SelectItem value="caribbean" >Caribbean</SelectItem>
-                            <SelectItem value="east-asian" >East Asian</SelectItem>
-                            <SelectItem value="latino/hispanic" >Latino / Hispanic</SelectItem>
-                            <SelectItem value="white/caucasian" >White / Caucasian</SelectItem>
-                            <SelectItem value="mixed" >Mixed</SelectItem>
-                            <SelectItem value="other" >Other</SelectItem>
-                            <SelectItem value="any/dont-matter" >Any, Doesn’t Matter</SelectItem>
+                            <SelectItem value="African" >African</SelectItem>
+                            <SelectItem value="African American" >African American</SelectItem>
+                            <SelectItem value="Desi / South-Asian" >Desi / South Asian</SelectItem>
+                            <SelectItem value="Arab / Middle-Eastren" >Arab / Middle Eastren</SelectItem>
+                            <SelectItem value="Caribbean" >Caribbean</SelectItem>
+                            <SelectItem value="East-Asian" >East Asian</SelectItem>
+                            <SelectItem value="Latino / Hispanic" >Latino / Hispanic</SelectItem>
+                            <SelectItem value="White / Caucasian" >White / Caucasian</SelectItem>
+                            <SelectItem value="Mixed" >Mixed</SelectItem>
+                            <SelectItem value="Other" >Other</SelectItem>
+                            <SelectItem value="Any" >Any</SelectItem>
                         </SelectContent>
                     </Select>
                     </div>
@@ -330,12 +330,12 @@ const PartnerPreferencesEditPage = () => {
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="high school diploma" >High School Diploma</SelectItem>
+                            <SelectItem value="High School Diploma" >High School Diploma</SelectItem>
                             <SelectItem value="College / University" >College / University</SelectItem>
                             <SelectItem value="Career Institute" >Career Institute</SelectItem>
                             <SelectItem value="Masters Degree" >Masters Degree</SelectItem>
                             <SelectItem value="Skilled Trade" >Skilled Trade</SelectItem>
-                            <SelectItem value="Any, Doesn’t Matter" >Any, Doesn’t Matter</SelectItem>
+                            <SelectItem value="Any" >Any, Doesn’t Matter</SelectItem>
                         </SelectContent>
                     </Select>
                     </div>

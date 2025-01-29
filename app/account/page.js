@@ -74,12 +74,14 @@ const AccountMainPage = () => {
         </div>
 
         <div className='px-5 md:px-20' >
-            <div className='flex items-center justify-center gap-5 mt-10' >
-                {profilePicture && (
-                    <Image src={profilePicture} className='rounded-md border-2 border-us_blue' alt='profile' height={200} width={150} />
-                )}
+            <div className='flex items-center justify-center gap-5 mt-5' >
+                <div className='overflow-hidden rounded-md border-2 border-us_blue w-34 h-34' >
+                  {profilePicture && (
+                      <Image src={profilePicture} className='object-cover w-full h-full' alt='profile' height={100} width={100} />
+                  )}
+                </div>
                 <div>
-                    <h1 className='text-md text-us_blue font-semibold capitalize' >{user?.name}</h1>
+                    <h1 className='text-sm text-us_blue font-semibold capitalize' >{user?.name}</h1>
                     <p className='text-sm text-sub_text_2 capitalize' >{user?.age} , {personalDetails?.maritalStatus}</p>
                     <p className="text-sm text-sub_text_2 capitalize" >{user?.city}</p>
                     <p className="text-sm text-sub_text_2 capitalize" >{user?.state}</p>

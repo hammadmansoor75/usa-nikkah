@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from "next-auth/react";
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+import MailLockIcon from '@mui/icons-material/MailLock';
 
 
 const LoginPage = () => {
@@ -37,25 +38,24 @@ const LoginPage = () => {
           <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/auth' className="cursor-pointer" ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
               <div className='w-full' >
-                <h1 className='text-center text-xl font-semibold' >Login</h1>
+                <h1 className='text-center text-xl font-semibold text-us_blue' >Login</h1>
               </div>
           </div> 
           
           <div className='flex items-center justify-center mt-10' >
 
-            <form onSubmit={handleSubmit} className='px-10 md:px-20' >
-              <p className='text-center text-sm text-sub_text_2 mt-5'>Please enter your valid phone number. We will send you a code to verify your account. </p>
-
+            <form onSubmit={handleSubmit} className='px-5 md:px-20 flex flex-col items-center' >
+              
               <div className="input flex items-center justify-center gap-2 mt-10" >
-                <Image src='/assets/us-flag.svg' alt='us-flag' height={40} width={40}/>
+              <MailLockIcon className="text-sub_text_2"  />
                 <p className='text-xl text-sub_text_2' >|</p>
                 <input type='email' placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full text-sm placeholder:text-sm placeholder:text-sub_text_2 mt-1" />                         
               </div>
 
               <div className="input flex items-center justify-center gap-2 mt-10" >
-                <LockOpenIcon />
+                <LockOpenIcon className="text-sub_text_2" />
                 <p className='text-xl text-sub_text_2' >|</p>
-                <input type='text' placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full text-sm placeholder:text-sm placeholder:text-sub_text_2 mt-1" />                         
+                <input type='password' placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full text-sm placeholder:text-sm placeholder:text-sub_text_2 mt-1" />                         
               </div>
 
               <p className='text-sm text-center text-sub_text_2 mt-10' >By logging in, you agree with our 

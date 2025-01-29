@@ -32,8 +32,8 @@ const handleProfileView = () => {
                 <Image onClick={handleProfileView} className='object-cover w-full h-full' src={profilePhoto} alt='profile' width={100} height={100}/>
             )}
         </div>
-        <h2 className='text-us_blue text-md mt-2'  >{userProfile.name}</h2>
-        <h2 className='text-us_blue text-sm ' >{userProfile.city}</h2>
+        <h2 className='text-us_blue text-md mt-2 capitalize'  >{userProfile.name}</h2>
+        <h2 className='text-us_blue text-sm capitalize ' >{userProfile.city}</h2>
     </div>
   )
 }

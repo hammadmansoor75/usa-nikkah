@@ -94,7 +94,7 @@ const ShortlistedByProfile = ({profile, removeFromShortlistedByUsers}) => {
             <div className='w-2/3' >
                 <div className='flex items-center justify-between' >
                     <div>
-                        <h3 className='text-sm text-us_blue font-medium' >{profile.name}</h3>
+                        <h3 className='text-sm text-us_blue font-medium capitalize' >{profile.name}</h3>
                         <p className='text-xs text-dark_text' >{calculateAge(profile.dob)} , {maritalStatus}</p>
                         <p className='text-xs text-dark_text' >{profile.city} , {profile.state}</p>
                     </div>

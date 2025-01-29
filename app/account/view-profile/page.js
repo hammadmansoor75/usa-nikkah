@@ -155,7 +155,7 @@ const ViewProfilePage = () => {
 
                 <div className='flex items-center justify-between mt-5 gap-5' >
                     <div className='' >
-                        <h2 className='text-us_blue text-md font-medium' >{basicDetails?.name} , {calculateAge(basicDetails?.dob)}</h2>
+                        <h2 className='text-us_blue text-md font-medium capitalize' >{basicDetails?.name} , {calculateAge(basicDetails?.dob)}</h2>
                         <p className='text-dark_text text-sm capitalize' >{personalDetails?.maritalStatus}, {personalDetails?.occupation}</p>
                     </div>
                     <div className='w-1/2 flex flex-col items-end'>
@@ -186,7 +186,7 @@ const ViewProfilePage = () => {
                         </div>
                         <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >No of Children</p>
-                            <p className='text-dark_text text-sm' >{personalDetails?.children}</p>
+                            <p className='text-dark_text text-sm capitalize' >{personalDetails?.children}</p>
                         </div>
                         <div className='grid grid-cols-2 gap-4 mt-2' >
                             <p className='text-sm text-sub_text_2' >Children Living Status</p>
@@ -218,7 +218,7 @@ const ViewProfilePage = () => {
                 <div className='flex items-center justify-center' >
                     <div className='mt-5 border border-light_gray flex items-center justify-between px-5 py-3 text-us_blue text-md rounded-md w-full md:w-1/2' >
                         <NightlightRoundOutlinedIcon/>
-                        <span>Relegious Details</span>
+                        <span>Religious Details</span>
                         {relegiousDetailsChevron ? <ExpandMoreIcon onClick={toggleRelegiousDetails} /> : <ExpandLessIcon onClick={toggleRelegiousDetails} />}
                     </div>
                 </div>
@@ -261,7 +261,7 @@ const ViewProfilePage = () => {
                 <div className='flex items-center justify-center' >
                     <div className='mt-5 border border-light_gray flex items-center justify-between px-5 py-3 text-us_blue text-md rounded-md w-full md:w-1/2' >
                         <SearchOutlinedIcon/>
-                        <span>Partner Prefrences</span>
+                        <span>Partner Preferences</span>
                         {partnerPrefrencesChevron ? <ExpandMoreIcon onClick={togglePartnerPrefrences} /> : <ExpandLessIcon onClick={togglePartnerPrefrences} />}
                     </div>
                 </div>

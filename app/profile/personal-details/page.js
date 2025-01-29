@@ -62,7 +62,7 @@ const personalDetailsScehma = z.object({
     maritalStatus : z.string().nonempty({ message: "Marital Status is required" }),
     children : z.string().nonempty({ message: "No of Children is required" }),
     childrenLiving : z.string().optional(),
-    moreKids : z.string().nonempty({ message: "Want More Kids is required" }),
+    moreKids : z.string().optional(),
     ethnicBackground : z.string().nonempty({ message: "Ethnic Background is required" }),
     occupation : z.string().nonempty({ message: "Occupation is required" }).refine((value) => /^[A-Za-z\s]+$/.test(value), {
         message: "Occupation must only contain letters and spaces",
@@ -79,7 +79,9 @@ const PersonalDetailsPage = () => {
     const [user,setUser] = useState(null);
 
     const [personalDetails, setPersonalDetails] = useState(null);
+
     const [showChildrenLiving, setShowChildrenLiving] = useState(true);
+    const [showWantMoreKids, setShowWantMoreKids] = useState(true)
 
     const {showAlert} = useAlert();
 
@@ -133,7 +135,7 @@ const PersonalDetailsPage = () => {
                     maritalStatus : data.maritalStatus,
                     children : data.children,
                     childrenLiving : data.childrenLiving || "",
-                    moreKids : data.moreKids,
+                    moreKids : data.moreKids || "",
                     ethnicBackground : data.ethnicBackground,
                     occupation : data.occupation,
                     hobbies : data.hobbies,
@@ -156,7 +158,7 @@ const PersonalDetailsPage = () => {
                     maritalStatus : data.maritalStatus,
                     children : data.children,
                     childrenLiving : data.childrenLiving || "",
-                    moreKids : data.moreKids,
+                    moreKids : data.moreKids || "",
                     ethnicBackground : data.ethnicBackground,
                     occupation : data.occupation,
                     hobbies : data.hobbies,
@@ -179,9 +181,11 @@ const PersonalDetailsPage = () => {
 
       const selectedChildren = watch("children");
       useEffect(() => {
-        setShowChildrenLiving(selectedChildren !== "none");
-        if (selectedChildren === "none") {
+        setShowChildrenLiving(selectedChildren !== "None");
+        setShowWantMoreKids(selectedChildren !== "None");
+        if (selectedChildren === "None") {
           setValue("childrenLiving", "");
+          setValue("moreKids", "");
         }
       }, [selectedChildren, setValue]);
 
@@ -204,7 +208,7 @@ const PersonalDetailsPage = () => {
         <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
             {/* <Link href='/auth' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link> */}
             <div className='w-full' >
-                <h1 className='text-center text-xl font-medium' >Personal Details</h1>
+                <h1 className='text-center text-xl  font-semibold text-us_blue' >Personal Details</h1>
             </div>
         </div>
         <div className='mt-5' >
@@ -244,9 +248,9 @@ const PersonalDetailsPage = () => {
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="neverMarried" >Never Married</SelectItem>
-                                <SelectItem value="divorced" >Divorced</SelectItem>
-                                <SelectItem value="widowed" >Widowed</SelectItem>
+                                <SelectItem value="Never Married" >Never Married</SelectItem>
+                                <SelectItem value="Divorced" >Divorced</SelectItem>
+                                <SelectItem value="Widowed" >Widowed</SelectItem>
                             </SelectContent>
                         </Select>
                         {errors.maritalStatus && <p className="text-red-500 mt-2 text-sm">{errors.maritalStatus.message}</p>}
@@ -259,7 +263,7 @@ const PersonalDetailsPage = () => {
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="none" >None</SelectItem>
+                                <SelectItem value="None" >None</SelectItem>
                                 <SelectItem value="1" >1</SelectItem>
                                 <SelectItem value="2" >2</SelectItem>
                                 <SelectItem value="3" >3</SelectItem>
@@ -277,17 +281,18 @@ const PersonalDetailsPage = () => {
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="n/a" >N/A</SelectItem>
-                                <SelectItem value="living with me" >Living with me</SelectItem>
-                                <SelectItem value="not living with me" >Not Living with me</SelectItem>
-                                <SelectItem value="shared custody" >Shared Custody</SelectItem>
+                                <SelectItem value="N/A" >N/A</SelectItem>
+                                <SelectItem value="Living With Me" >Living with me</SelectItem>
+                                <SelectItem value="Not Living With Me" >Not Living with me</SelectItem>
+                                <SelectItem value="Shared Custody" >Shared Custody</SelectItem>
                             </SelectContent>
                         </Select>
                         {errors.childrenLiving && <p className="text-red-500 mt-2 text-sm">{errors.childrenLiving.message}</p>}
                     </div>
                     )}
 
-                    <div className="mt-3 grid grid-cols-2" >
+                    {showWantMoreKids && (
+                        <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Want More Kids</label>
                         <Select onValueChange={(value) => setValue("moreKids", value)} value={watch("moreKids")} >
                             <SelectTrigger>
@@ -301,6 +306,7 @@ const PersonalDetailsPage = () => {
                         </Select>
                         {errors.moreKids && <p className="text-red-500 mt-2 text-sm">{errors.moreKids.message}</p>}
                     </div>
+                    )}
 
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Ethnic Background</label>
@@ -309,16 +315,16 @@ const PersonalDetailsPage = () => {
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="african" >African</SelectItem>
-                                <SelectItem value="african american" >African American</SelectItem>
-                                <SelectItem value="desi/south-asian" >Desi / South Asian</SelectItem>
-                                <SelectItem value="arab/middle-eastren" >Arab / Middle Eastren</SelectItem>
-                                <SelectItem value="caribbean" >Caribbean</SelectItem>
-                                <SelectItem value="east-asian" >East Asian</SelectItem>
-                                <SelectItem value="latino/hispanic" >Latino / Hispanic</SelectItem>
-                                <SelectItem value="white/caucasian" >White / Caucasian</SelectItem>
-                                <SelectItem value="mixed" >Mixed</SelectItem>
-                                <SelectItem value="other" >Other</SelectItem>
+                                <SelectItem value="African" >African</SelectItem>
+                                <SelectItem value="African American" >African American</SelectItem>
+                                <SelectItem value="Desi / South-Asian" >Desi / South Asian</SelectItem>
+                                <SelectItem value="Arab / Middle-Eastren" >Arab / Middle Eastren</SelectItem>
+                                <SelectItem value="Caribbean" >Caribbean</SelectItem>
+                                <SelectItem value="East-Asian" >East Asian</SelectItem>
+                                <SelectItem value="Latino / Hispanic" >Latino / Hispanic</SelectItem>
+                                <SelectItem value="White / Caucasian" >White / Caucasian</SelectItem>
+                                <SelectItem value="Mixed" >Mixed</SelectItem>
+                                <SelectItem value="Other" >Other</SelectItem>
                             </SelectContent>
                         </Select>
                         {errors.ethnicBackground && <p className="text-red-500 mt-2 text-sm">{errors.ethnicBackground.message}</p>}
@@ -331,7 +337,7 @@ const PersonalDetailsPage = () => {
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="high school diploma" >High School Diploma</SelectItem>
+                                <SelectItem value="High School Diploma" >High School Diploma</SelectItem>
                                 <SelectItem value="College / University" >College / University</SelectItem>
                                 <SelectItem value="Career Institute" >Career Institute</SelectItem>
                                 <SelectItem value="Masters Degree" >Masters Degree</SelectItem>
@@ -359,7 +365,7 @@ const PersonalDetailsPage = () => {
                         {errors.hobbies && <p className="text-red-500 text-sm mt-2" >{errors.hobbies.message}</p>}
                     </div>
 
-                    <div className='flex items-center justify-center mt-5' ><button type='submit' className='blue-button' >NEXT</button></div>
+                    <div className='flex items-center justify-center mt-10' ><button type='submit' className='blue-button' >NEXT</button></div>
                 </form>
             </div>
         </div>

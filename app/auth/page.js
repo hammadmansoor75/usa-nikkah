@@ -18,10 +18,10 @@ const AuthPage = () => {
                 <Image src='/assets/login-image.svg' alt='loginImage' height={300} width={300} />
             </div>
             <div className='flex flex-col items-center justify-center gap-4 mt-5' >
-                <Link href='/auth/login' ><button className='blue-button flex items-center justify-center gap-4 ' ><PhoneAndroidIcon />LOGIN WITH PHONE</button></Link>
-                <Link href='/auth/signup' ><button className='white-button flex items-center justify-center gap-4' ><AccountCircleIcon />NO ACCOUNT? SIGNUP</button></Link>
+                <Link href='/auth/login' ><button className='blue-button flex items-center justify-start ' ><PhoneAndroidIcon className='ml-4' /><span className='text-center w-full' >LOGIN WITH EMAIL</span></button></Link>
+                <Link href='/auth/signup' ><button className='white-button flex items-center justify-start' ><AccountCircleIcon className='ml-4' /><span className='text-center w-full' >NO ACCOUNT? SIGNUP</span></button></Link>
             </div>
-            <div className='flex items-center justify-between mt-5 w-full md:w-1/3 px-10' >
+            <div className='flex items-center justify-between mt-10 w-full md:w-1/3 px-10' >
                 <Link href='terms' className='text-us_blue underline' >Terms & Conditions</Link>
                 <Link href='privacy' className='text-us_blue underline' >Privacy Policy</Link>
             </div>

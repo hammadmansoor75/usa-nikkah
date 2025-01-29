@@ -14,6 +14,39 @@ import { useSession } from 'next-auth/react';
 import { ClipLoader } from 'react-spinners';
 import { useAlert } from '@/context/AlertContext';
 
+const heights = [
+    "Below 4ft",
+    "4ft",
+    "4ft 1in",
+    "4ft 2in",
+    "4ft 3in",
+    "4ft 4in",
+    "4ft 5in",
+    "4ft 6in",
+    "4ft 7in",
+    "4ft 8in",
+    "4ft 9in",
+    "4ft 10in",
+    "4ft 11in",
+    "5ft",
+    "5ft 1in",
+    "5ft 2in",
+    "5ft 3in",
+    "5ft 4in",
+    "5ft 5in",
+    "5ft 6in",
+    "5ft 7in",
+    "5ft 8in",
+    "5ft 9in",
+    "5ft 10in",
+    "5ft 11in",
+    "6ft",
+    "6ft 1in",
+    "6ft 2in",
+    "6ft 3in",
+    "Above 6ft 3in"
+];
+
  
 const personalDetailsScehma = z.object({
     aboutMe: z.string().nonempty({ message: "About Me is required" }).refine((value) => {
@@ -32,7 +65,7 @@ const personalDetailsScehma = z.object({
     maritalStatus : z.string().nonempty({ message: "Marital Status is required" }),
     children : z.string().nonempty({ message: "No of Children is required" }),
     childrenLiving : z.string().optional(),
-    moreKids : z.string().nonempty({ message: "Want More Kids is required" }),
+    moreKids : z.string().optional(),
     ethnicBackground : z.string().nonempty({ message: "Ethnic Background is required" }),
     occupation : z.string().nonempty({ message: "Occupation is required" }).refine((value) => /^[A-Za-z\s]+$/.test(value), {
         message: "Occupation must only contain letters and spaces",
@@ -48,6 +81,8 @@ const PersonalDetailsPage = () => {
     const router = useRouter();
     const {showAlert} = useAlert();
 
+    const [showChildrenLiving, setShowChildrenLiving] = useState(true);
+    const [showWantMoreKids, setShowWantMoreKids] = useState(true)
     const {
       register,
       handleSubmit,
@@ -84,6 +119,17 @@ const PersonalDetailsPage = () => {
 
 
     },[setValue,status,session])
+
+
+    const selectedChildren = watch("children");
+          useEffect(() => {
+            setShowChildrenLiving(selectedChildren !== "None");
+            setShowWantMoreKids(selectedChildren !== "None");
+            if (selectedChildren === "None") {
+              setValue("childrenLiving", "");
+              setValue("moreKids", "");
+            }
+    }, [selectedChildren, setValue]);
 
   
 
@@ -125,7 +171,7 @@ if(!session){
       <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
         <Link href='/account' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
         <div className='w-full' >
-          <h1 className='text-center text-xl font-medium' >Personal Details</h1>
+          <h1 className='text-center text-xl  font-semibold text-us_blue' >Personal Details</h1>
         </div>
       </div>
 
@@ -159,9 +205,9 @@ if(!session){
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="neverMarried" >Never Married</SelectItem>
-                                <SelectItem value="divorced" >Divorced</SelectItem>
-                                <SelectItem value="widowed" >Widowed</SelectItem>
+                                <SelectItem value="Never Married" >Never Married</SelectItem>
+                                <SelectItem value="Divorced" >Divorced</SelectItem>
+                                <SelectItem value="Widowed" >Widowed</SelectItem>
                             </SelectContent>
                         </Select>
                         {errors.maritalStatus && <p className="text-red-500 mt-2 text-sm">{errors.maritalStatus.message}</p>}
@@ -174,7 +220,7 @@ if(!session){
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="none" >None</SelectItem>
+                                <SelectItem value="None" >None</SelectItem>
                                 <SelectItem value="1" >1</SelectItem>
                                 <SelectItem value="2" >2</SelectItem>
                                 <SelectItem value="3" >3</SelectItem>
@@ -184,23 +230,26 @@ if(!session){
                         {errors.children && <p className="text-red-500 mt-2 text-sm">{errors.children.message}</p>}
                     </div>
 
-                    <div className="mt-3 grid grid-cols-2" >
+                    {showChildrenLiving && (
+                        <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Children Living Status</label>
                         <Select onValueChange={(value) => setValue("childrenLiving", value)} value={watch("childrenLiving")} >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="n/a" >N/A</SelectItem>
-                                <SelectItem value="living with me" >Living with me</SelectItem>
-                                <SelectItem value="not living with me" >Not Living with me</SelectItem>
-                                <SelectItem value="shared custody" >Shared Custody</SelectItem>
+                                <SelectItem value="N/A" >N/A</SelectItem>
+                                <SelectItem value="Living With Me" >Living with me</SelectItem>
+                                <SelectItem value="Not Living With Me" >Not Living with me</SelectItem>
+                                <SelectItem value="Shared Custody" >Shared Custody</SelectItem>
                             </SelectContent>
                         </Select>
                         {errors.childrenLiving && <p className="text-red-500 mt-2 text-sm">{errors.childrenLiving.message}</p>}
                     </div>
+                    )}
 
-                    <div className="mt-3 grid grid-cols-2" >
+                    {showWantMoreKids && (
+                        <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Want More Kids</label>
                         <Select onValueChange={(value) => setValue("moreKids", value)} value={watch("moreKids")} >
                             <SelectTrigger>
@@ -214,6 +263,7 @@ if(!session){
                         </Select>
                         {errors.moreKids && <p className="text-red-500 mt-2 text-sm">{errors.moreKids.message}</p>}
                     </div>
+                    )}
 
                     <div className="mt-3 grid grid-cols-2" >
                         <label className="text-sub_text_2 text-sm mb-3">Ethnic Background</label>
@@ -222,16 +272,16 @@ if(!session){
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="african" >African</SelectItem>
-                                <SelectItem value="african american" >African American</SelectItem>
-                                <SelectItem value="desi/south-asian" >Desi / South Asian</SelectItem>
-                                <SelectItem value="arab/middle-eastren" >Arab / Middle Eastren</SelectItem>
-                                <SelectItem value="caribbean" >Caribbean</SelectItem>
-                                <SelectItem value="east-asian" >East Asian</SelectItem>
-                                <SelectItem value="latino/hispanic" >Latino / Hispanic</SelectItem>
-                                <SelectItem value="white/caucasian" >White / Caucasian</SelectItem>
-                                <SelectItem value="mixed" >Mixed</SelectItem>
-                                <SelectItem value="other" >Other</SelectItem>
+                                <SelectItem value="African" >African</SelectItem>
+                                <SelectItem value="African American" >African American</SelectItem>
+                                <SelectItem value="Desi / South-Asian" >Desi / South Asian</SelectItem>
+                                <SelectItem value="Arab / Middle-Eastren" >Arab / Middle Eastren</SelectItem>
+                                <SelectItem value="Caribbean" >Caribbean</SelectItem>
+                                <SelectItem value="East-Asian" >East Asian</SelectItem>
+                                <SelectItem value="Latino / Hispanic" >Latino / Hispanic</SelectItem>
+                                <SelectItem value="White / Caucasian" >White / Caucasian</SelectItem>
+                                <SelectItem value="Mixed" >Mixed</SelectItem>
+                                <SelectItem value="Other" >Other</SelectItem>
                             </SelectContent>
                         </Select>
                         {errors.ethnicBackground && <p className="text-red-500 mt-2 text-sm">{errors.ethnicBackground.message}</p>}
@@ -244,7 +294,7 @@ if(!session){
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="high school diploma" >High School Diploma</SelectItem>
+                                <SelectItem value="High School Diploma" >High School Diploma</SelectItem>
                                 <SelectItem value="College / University" >College / University</SelectItem>
                                 <SelectItem value="Career Institute" >Career Institute</SelectItem>
                                 <SelectItem value="Masters Degree" >Masters Degree</SelectItem>

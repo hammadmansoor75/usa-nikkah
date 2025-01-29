@@ -123,20 +123,20 @@ const SignupPage = () => {
                 <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
                     <Link href='/auth' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
                     <div className='w-full' >
-                        <h1 className='text-center text-xl font-medium' >Sign Up</h1>
+                        <h1 className='text-center text-xl font-semibold text-us_blue' >Sign Up</h1>
                     </div>
                 </div>
                 <div className="flex items-center justify-center mt-10" >
                     <form onSubmit={handleSubmit(onSubmit)} className="px-10 md:px-20"  >
                         <div className="input flex items-center justify-center gap-2" >
                             <PersonIcon className="text-sub_text_2"  />
-                            <input {...register("fullName")} placeholder="Full Name" className="w-full" />                            
+                            <input {...register("fullName")} placeholder="Full Name" className="w-full capitalize" />                            
                         </div>
                         {errors.fullName && <p className="text-red-500 text-sm mt-2" >{errors.fullName.message}</p>}
 
                         <div className="input flex items-center justify-center gap-2 mt-3" >
                             <MailLockIcon className="text-sub_text_2"  />
-                            <input {...register("email")} placeholder="Email" className="w-full"  />
+                            <input {...register("email")} type="email" placeholder="Email" className="w-full"  />
                             
                         </div>
                         {errors.email && <p className="text-red-500 text-sm mt-2" >{errors.email.message}</p>}
@@ -150,7 +150,7 @@ const SignupPage = () => {
                         
                         <div className="input flex items-center justify-center gap-2 mt-3" >
                             <LocationCityIcon className="text-sub_text_2"  />
-                            <input {...register("city")} placeholder="City" className="w-full"  />
+                            <input {...register("city")} placeholder="City" className="w-full capitalize"  />
                         </div>
                         {errors.city && <p className="text-red-500 text-sm mt-2" >{errors.city.message}</p>}
 

@@ -141,7 +141,7 @@ const RelegiousDetailsPage = () => {
         <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/profile/personal-details' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
-                <h1 className='text-center text-xl font-medium' >Relegious Details</h1>
+                <h1 className='text-center text-xl font-semibold text-us_blue' >Relegious Details</h1>
             </div>
         </div>
 
@@ -162,7 +162,7 @@ const RelegiousDetailsPage = () => {
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Relegious" >Religious</SelectItem>
+                                <SelectItem value="Religious" >Religious</SelectItem>
                                 <SelectItem value="Moderate" >Moderate</SelectItem>
                                 <SelectItem value="Liberal" >Liberal</SelectItem>
                             </SelectContent>
@@ -234,7 +234,7 @@ const RelegiousDetailsPage = () => {
 
                     {gender === 'male' && (
                         <div>
-                            <div className="mt-5 flex items-center justify-start gap-7" >
+                            <div className="mt-7 flex items-center justify-start gap-7" >
                                 <label className="text-sub_text_2 text-sm" >Do you smoke?</label>
                                 <RadioGroup
                                     onValueChange={(value) => setValue("smoke", value)}
@@ -256,7 +256,7 @@ const RelegiousDetailsPage = () => {
 
                     {gender === 'female' && (
                         <div>
-                            <div className="mt-5 flex items-center justify-start gap-7" >
+                            <div className="mt-7 flex items-center justify-start gap-7" >
                                 <label className="text-sub_text_2 text-sm" >Do you wear hijab?</label>
                                 <RadioGroup
                                     onValueChange={(value) => setValue("hijab", value)}
@@ -291,7 +291,7 @@ const RelegiousDetailsPage = () => {
                     )}
 
 
-                    <div className='flex items-center justify-center mt-5' ><button className='blue-button' type='submit' >NEXT</button></div>
+                    <div className='flex items-center justify-center mt-12' ><button className='blue-button' type='submit' >NEXT</button></div>
                 </form>
             </div>
 

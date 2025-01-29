@@ -95,6 +95,7 @@ const PartnerPrefrencesPage = () => {
                     const response = await axios.get(`/api/user/add-partner-prefrence?userId=${session?.user?.id}`)
                     if (response.status === 200) {
                         const data = response.data;
+                        console.log(data)
                         setPartnerPrefrences(response.data);
                         setValue("ageGroupFrom", data?.ageGroupFrom || "");
                         setValue("ageGroupTo", data?.ageGroupTo || "");
@@ -105,11 +106,13 @@ const PartnerPrefrencesPage = () => {
                         setValue("educationLevel", data?.educationLevel || "");
                         setValue("work", data?.work || "");
                         setValue("considerSomeoneHavingChildren", data?.considerSomeoneHavingChildren || "");
+                        setValue("hijab", data?.hijab || "");
+                        setValue("smoke", data?.smoke || "");
                         if(gender === 'male'){
-                            setValue("hijab", data?.hijab || "");
+                            
                           }
                         if(gender === 'female'){
-                            setValue("smoke", data?.smoke || "");
+                            
                         }
 
                     } else {
@@ -120,7 +123,7 @@ const PartnerPrefrencesPage = () => {
                 }
             }
         }
-        fetchPartnerPreferencs(session.user.id);
+        fetchPartnerPreferencs(session?.user?.id);
     },[status, session, gender, setValue]);
 
 
@@ -129,6 +132,7 @@ const PartnerPrefrencesPage = () => {
 
     const onSubmit = async (data) => {
         try {
+            console.log(data);
             if(partnerPrefrences){
                 let response;
                 if (gender === 'male') {
@@ -163,7 +167,7 @@ const PartnerPrefrencesPage = () => {
                         educationLevel : data.educationLevel,
                         work : data.work,
                         considerSomeoneHavingChildren : data.considerSomeoneHavingChildren,
-                        smoke : data.smoke,
+                        hijab : data.hijab,
                         userId : session.user.id
                     });
                     if(response.status === 200){
@@ -187,7 +191,7 @@ const PartnerPrefrencesPage = () => {
                         educationLevel : data.educationLevel,
                         work : data.work,
                         considerSomeoneHavingChildren : data.considerSomeoneHavingChildren,
-                        hijab : data.hijab,
+                        smoke : data.smoke,
                         userId : session.user.id
                     });
                     if(response.status === 200){
@@ -224,7 +228,7 @@ const PartnerPrefrencesPage = () => {
         <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/profile/relegious-details' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
-                <h1 className='text-center text-xl font-medium' >Partner Prefrences</h1>
+                <h1 className='text-center text-xl font-semibold text-us_blue' >Partner Preferences</h1>
             </div>
         </div>
 
@@ -298,9 +302,9 @@ const PartnerPrefrencesPage = () => {
                                                     <SelectValue placeholder="Select" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="neverMarried" >Never Married</SelectItem>
-                                                    <SelectItem value="divorced" >Divorced</SelectItem>
-                                                    <SelectItem value="widowed" >Widowed</SelectItem>
+                                                    <SelectItem value="Never Married" >Never Married</SelectItem>
+                                                    <SelectItem value="Divorced" >Divorced</SelectItem>
+                                                    <SelectItem value="Widowed" >Widowed</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -311,13 +315,13 @@ const PartnerPrefrencesPage = () => {
                     
 
                     <div className="mt-3" >
-                        <label className="text-sub_text_2 text-sm mb-3">Relegiousity Prefrence</label>
+                        <label className="text-sub_text_2 text-sm mb-3">Religiousity Preference</label>
                         <Select className="text-sub_text_2"  onValueChange={(value) => setValue("relegiousPrefrence", value)} value={watch("relegiousPrefrence")}  >
                             <SelectTrigger className="w-[300px] h-[40px]">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Relegious" >Relegious</SelectItem>
+                                <SelectItem value="Religious" >Religious</SelectItem>
                                 <SelectItem value="Moderate" >Moderate</SelectItem>
                                 <SelectItem value="Liberal" >Liberal</SelectItem>
                                 <SelectItem value="Dont Matter" >Dont Matter</SelectItem>
@@ -366,24 +370,24 @@ const PartnerPrefrencesPage = () => {
                     )}
 
                     <div className="mt-3" >
-                        <label className="text-sub_text_2 text-sm mb-3">Ethnicity Prefrence</label>
+                        <label className="text-sub_text_2 text-sm mb-3">Ethnicity Preference</label>
                         <div className='mt-2' >
                         <Select onValueChange={(value) => setValue("ethnicityPrefrence", value)} value={watch("ethnicityPrefrence")}  >
                             <SelectTrigger className="w-[300px] h-[40px]" >
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="african" >African</SelectItem>
-                                <SelectItem value="african american" >African American</SelectItem>
-                                <SelectItem value="desi/south-asian" >Desi / South Asian</SelectItem>
-                                <SelectItem value="arab/middle-eastren" >Arab / Middle Eastren</SelectItem>
-                                <SelectItem value="caribbean" >Caribbean</SelectItem>
-                                <SelectItem value="east-asian" >East Asian</SelectItem>
-                                <SelectItem value="latino/hispanic" >Latino / Hispanic</SelectItem>
-                                <SelectItem value="white/caucasian" >White / Caucasian</SelectItem>
-                                <SelectItem value="mixed" >Mixed</SelectItem>
-                                <SelectItem value="other" >Other</SelectItem>
-                                <SelectItem value="any/dont-matter" >Any, Doesn’t Matter</SelectItem>
+                                <SelectItem value="African" >African</SelectItem>
+                                <SelectItem value="African American" >African American</SelectItem>
+                                <SelectItem value="Desi / South-Asian" >Desi / South Asian</SelectItem>
+                                <SelectItem value="Arab / Middle-Eastren" >Arab / Middle Eastren</SelectItem>
+                                <SelectItem value="Caribbean" >Caribbean</SelectItem>
+                                <SelectItem value="East-Asian" >East Asian</SelectItem>
+                                <SelectItem value="Latino / Hispanic" >Latino / Hispanic</SelectItem>
+                                <SelectItem value="White / Caucasian" >White / Caucasian</SelectItem>
+                                <SelectItem value="Mixed" >Mixed</SelectItem>
+                                <SelectItem value="Other" >Other</SelectItem>
+                                <SelectItem value="Any" >Any</SelectItem>
                             </SelectContent>
                         </Select>
                         </div>
@@ -399,12 +403,12 @@ const PartnerPrefrencesPage = () => {
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="high school diploma" >High School Diploma</SelectItem>
+                                <SelectItem value="High School Diploma" >High School Diploma</SelectItem>
                                 <SelectItem value="College / University" >College / University</SelectItem>
                                 <SelectItem value="Career Institute" >Career Institute</SelectItem>
                                 <SelectItem value="Masters Degree" >Masters Degree</SelectItem>
                                 <SelectItem value="Skilled Trade" >Skilled Trade</SelectItem>
-                                <SelectItem value="Any, Doesn’t Matter" >Any, Doesn’t Matter</SelectItem>
+                                <SelectItem value="Any" >Any</SelectItem>
                             </SelectContent>
                         </Select>
                         </div>
@@ -451,7 +455,7 @@ const PartnerPrefrencesPage = () => {
                         {errors.considerSomeoneHavingChildren && <p className="text-red-500 mt-2 text-sm">{errors.considerSomeoneHavingChildren.message}</p>}
                     </div>
 
-                    <div className='flex items-center justify-center mt-5' >
+                    <div className='flex items-center justify-center mt-10' >
                         <button className='blue-button' type='submit' >DONE</button>
                     </div>
                     

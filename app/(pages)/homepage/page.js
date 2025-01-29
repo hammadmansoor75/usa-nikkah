@@ -110,6 +110,10 @@ if(status === 'authenticated' && session){
     router.push('/search')
   }
 
+  const handleGoToAccount = () => {
+    router.push('/account')
+  }
+
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center">
@@ -127,7 +131,7 @@ if(status === 'authenticated' && session){
       <div className='flex items-center justify-between' >
         <div>
           <p className='text-sm text-sub_text_2' >Welcome,</p>
-          <h1 className='text-md text-us_blue font-semibold flex items-center justify-center gap-2' >{session?.user?.name}<Link href='/account' ><Image src='/assets/edit.svg' alt='edit' height={12} width={12} /></Link> </h1>
+          <h1 className='text-md text-us_blue font-semibold flex items-center justify-center gap-2 capitalize' >{session?.user?.name}<Link href='/account' ><Image src='/assets/edit.svg' alt='edit' height={12} width={12} /></Link> </h1>
         </div>
         <div className='flex items-start justify-center gap-1'>
           <NotificationsNoneOutlinedIcon />
@@ -140,12 +144,12 @@ if(status === 'authenticated' && session){
       </div>
 
       <div className='flex items-center gap-10 justify-between mt-5'>
-        <button className='home-blue-btn flex items-center justify-center' >UPGRADE</button>
-        <button onClick={handleSearch} className='home-red-btn flex items-center justify-center gap-2'><SearchOutlinedIcon fontSize="medium" /> Search</button>
+        <button className='home-blue-btn flex items-center justify-center' >UPGRADE PLAN</button>
+        <button onClick={handleSearch} className='home-red-btn flex items-center justify-center gap-2'><SearchOutlinedIcon fontSize="medium" /> SEARCH</button>
       </div>
 
 
-      <div className="relative min-h-[170px] w-full mt-5">
+      <div className="relative min-h-[170px] w-full mt-7">
         <div className="absolute inset-0 bg-gradient-to-r from-[#BF0D3E] to-[#041E42] opacity-80 rounded-lg">
           <div className="grid grid-cols-2 grid-rows-2 h-full w-full p-4">
             {/* <!-- Section 1 --> */}
@@ -220,11 +224,14 @@ if(status === 'authenticated' && session){
 
 
       {session?.user?.adminVerificationStatus === false && (
-        <div className='fixed inset-0 bg-us_blue bg-opacity-50 w-full' >
-          <div className='fixed top-1/2 h-[400px] rounded-t-3xl py-10 px-5 bg-white w-full' >
+        <div className='fixed z-20 inset-0 bg-us_blue bg-opacity-50 w-full' >
+          <div className='fixed top-1/3 h-[600px] rounded-t-3xl py-10 px-5 bg-white w-full' >
           <h1 className='text-xl font-semibold text-us_blue text-center' >Verification In Progress </h1>
           <p className='text-md text-sub_text_2 mt-5' >Your profile was created successfully. Our staff will verify your account and activate it if your selfie verification passed.</p>
           <p className='text-md text-sub_text_2 mt-5' >You will receive a notification when your profile is activated. Thank you for your patience. In the meantime, if you feel you need to correct any information, you can do so now.</p>
+          <div className='flex items-center justify-center mt-10' >
+          <button onClick={handleGoToAccount} className='blue-button' >GO TO ACCOUNT</button>
+          </div>
           </div>
         </div>
       )}

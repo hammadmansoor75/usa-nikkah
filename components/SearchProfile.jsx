@@ -74,7 +74,7 @@ const toggleThumbsUpOpen = () => setThumbsUpOpen(!thumbsUpOpen);
                 )}
             </div>
             <div>
-                <h3 className='text-sm text-us_blue font-medium' >{profile.name}</h3>
+                <h3 className='text-sm text-us_blue font-medium capitalize' >{profile.name}</h3>
                 <p className='text-xs text-dark_text capitalize' >{calculateAge(profile.dob)} , {profile?.personalDetails?.maritalStatus} </p>
                 <p className='text-xs text-dark_text' >{profile.city} , {profile.state}</p>
                 <button onClick={toggleThumbsUpOpen} className='bg-us_blue flex items-center justify-between gap-2 text-white mt-2 px-3 py-2 text-sm rounded-lg cursor-pointer' ><StarOutlinedIcon className='text-yellow-400' /><span>Shortlist</span></button>
