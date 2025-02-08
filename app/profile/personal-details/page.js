@@ -144,7 +144,7 @@ const PersonalDetailsPage = () => {
                   })
               
                   if(response.status === 200){
-                    router.push('/profile/relegious-details');
+                    router.push('/profile/religious-details');
                   }else{
                     showAlert("Something went wrong")
                   }
@@ -166,7 +166,7 @@ const PersonalDetailsPage = () => {
                     userId : session.user.id
                 });
                 if(response.status === 200){
-                    router.push('/profile/relegious-details')
+                    router.push('/profile/religious-details')
                 }else{
                     showAlert("Something went wrong! Please Try Again!")
                     console.log("Something went wrong!")
@@ -204,7 +204,7 @@ const PersonalDetailsPage = () => {
 
 
   return (
-    <section className='container max-w-screen-md mx-auto mb-10 overflow-hidden' >
+    <section className='w-full mb-10 overflow-hidden' >
         <div className='bg-white shadow-lg flex items-center justify-start px-2 md:px-10 py-3 w-full' >
             {/* <Link href='/auth' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link> */}
             <div className='w-full' >

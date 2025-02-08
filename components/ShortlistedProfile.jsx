@@ -141,7 +141,7 @@ const ShortlistedProfile = ({profile, removeFromShortlistedUsers, getMatchedUser
                     </div>
                 </div>
                 <div className='flex items-center justify-center gap-4 mt-4' >
-                    <button className='bg-us_blue flex items-center justify-between gap-2 text-white px-2 py-1 text-sm rounded-lg cursor-pointer' ><CancelIcon /></button>
+                    <button className='bg-us_blue flex items-center justify-between gap-2 text-white px-2 py-1 text-sm rounded-lg cursor-pointer' onClick={toggleThumbsDownOpen} ><CancelIcon /></button>
                     <button onClick={toggleThumbsDownOpen} className='bg-us_blue px-2 py-1 rounded-lg flex items-center cursor-pointer justify-center' >
                         <ThumbDownRoundedIcon className='text-white' />
                     </button>

@@ -46,12 +46,12 @@ export async function POST(req) {
     }
 
     // Check if the logged-in user is already in the target user's shortlistedBy array
-    if (targetUser.shortlistedBy.includes(loggedInUserId)) {
-      return new Response(
-        JSON.stringify({ error: "You are already in the target user's shortlistedBy list" }),
-        { status: 400 }
-      );
-    }
+    // if (targetUser.shortlistedBy.includes(loggedInUserId)) {
+    //   return new Response(
+    //     JSON.stringify({ error: "You are already in the target user's shortlistedBy list" }),
+    //     { status: 400 }
+    //   );
+    // }
 
     // Update the logged-in user's shortlistedUsers array
     const updatedLoggedInUser = await prisma.user.update({

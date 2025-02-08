@@ -18,6 +18,7 @@ import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useSession } from 'next-auth/react';
+import { useAlert } from '@/context/AlertContext';
 
 const ProfileViewUser = () => {
     
@@ -25,6 +26,7 @@ const ProfileViewUser = () => {
     const [loggedInUser,setLoggedInUser] = useState();
 
     const [user, setUser] = useState();
+    const [userId, setUserId] = useState();
     
     const [basicDetails, setBasicDetails] = useState();
     const [personalDetails, setPersonalDetails] = useState();
@@ -42,6 +44,10 @@ const ProfileViewUser = () => {
     const toggleRelegiousDetails = () => setReligiousDetailsChevron(!relegiousDetailsChevron);
     const togglePartnerPrefrences = () => setPartnerPrefrencesChevron(!partnerPrefrencesChevron);
 
+    const [shortlist, setShortlist] = useState(false);
+
+    const {showAlert} = useAlert();
+
 
     useEffect(() => {
         if(status === 'authenticated' && session){
@@ -50,6 +56,7 @@ const ProfileViewUser = () => {
                 const idFromPath = urlPath.split("/").pop();
                 if(idFromPath){
                     extractUser(idFromPath)
+                    setUserId(idFromPath);
                     // setProfileId(idFromPath);
                     fetchBasicDetails(idFromPath);
                     fetchImages(idFromPath);
@@ -143,6 +150,32 @@ const ProfileViewUser = () => {
             }
         }
     }, [status, session])
+
+
+   
+    const toggelShortlist = () => setShortlist(!shortlist);
+
+    const handleShortlist = async () => {
+        try {
+            const response = await axios.post('/api/matching/shortlisted', {
+                loggedInUserId : session?.user?.id,
+                targetUserId : userId
+            })
+            if(response.status === 200){
+                // removeFromNewUsers(profile.id)
+                toggelShortlist();
+                showAlert("Profile Shortlisted")
+                
+            }else{
+                toggelShortlist();
+                showAlert(response.data.error)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
   return (
     <main className='relative' >
 
@@ -164,7 +197,7 @@ const ProfileViewUser = () => {
         <div className='flex items-center justify-center' >
             <div className="absolute top-[340px] flex items-center z-20 justify-center gap-7">
             <div className='bg-white rounded-full shadow-lg w-20 h-20 flex items-center justify-center transform -translate-y-1/2' >
-                <Image src='/assets/star.svg' className='p-5' alt='star' layout='fill'/>
+                <Image src='/assets/star.svg' className='p-5' alt='star' layout='fill' onClick={toggelShortlist} />
             </div>
             <div className='bg-white rounded-full shadow-lg px-4 py-4 flex items-center justify-center transform -translate-y-1/2 w-20 h-20' >
                 <Image src='/assets/like.svg' className='p-5' alt='star' layout='fill' />
@@ -184,7 +217,7 @@ const ProfileViewUser = () => {
                         <p className='text-dark_text text-sm capitalize' >{personalDetails?.maritalStatus}, {personalDetails?.occupation}</p>
                     </div>
                     <div className='w-1/2 flex flex-col items-end'>
-                        <h2 className='text-us_blue text-md font-medium' >{personalDetails?.height}</h2>
+                        <h2 className='text-us_blue text-md font-medium flex items-baseline justify-center gap-2' ><Image src='/assets/height.svg' alt='height' height={18} width={9} />{personalDetails?.height}</h2>
                         {/* <p className='text-dark_text text-sm'>User ID : {basicDetails.id}</p> */}
                     </div>
                 </div>
@@ -244,11 +277,11 @@ const ProfileViewUser = () => {
                     <div className='mt-5 border border-light_gray flex items-center justify-between px-5 py-3 text-us_blue text-md rounded-md w-full md:w-1/2' >
                         <NightlightRoundOutlinedIcon/>
                         <span>Relegious Details</span>
-                        {relegiousDetailsChevron ? <ExpandMoreIcon onClick={toggleRelegiousDetails} /> : <ExpandLessIcon onClick={toggleRelegiousDetails} />}
+                        {personalDetailsChevron ? <ExpandMoreIcon onClick={togglePersonalDetails} /> : <ExpandLessIcon onClick={togglePersonalDetails} />}
                     </div>
                 </div>
 
-                {relegiousDetailsChevron && (
+                {personalDetailsChevron && (
                     <div className='mt-5' >
                         <div className='grid grid-cols-2 gap-4' >
                             <p className='text-sm text-sub_text_2' >Religiosity</p>
@@ -287,11 +320,11 @@ const ProfileViewUser = () => {
                     <div className='mt-5 border border-light_gray flex items-center justify-between px-5 py-3 text-us_blue text-md rounded-md w-full md:w-1/2' >
                         <SearchOutlinedIcon/>
                         <span>Partner Prefrences</span>
-                        {partnerPrefrencesChevron ? <ExpandMoreIcon onClick={togglePartnerPrefrences} /> : <ExpandLessIcon onClick={togglePartnerPrefrences} />}
+                        {personalDetailsChevron ? <ExpandMoreIcon onClick={togglePersonalDetails} /> : <ExpandLessIcon onClick={togglePersonalDetails} />}
                     </div>
                 </div>
 
-                {partnerPrefrencesChevron && (
+                {personalDetailsChevron && (
                     <div className='mt-5' >
                         <div className='grid grid-cols-2 gap-4' >
                             <p className='text-sm text-sub_text_2' >Age Group From</p>
@@ -344,7 +377,22 @@ const ProfileViewUser = () => {
                     <p className='text-dark_text text-sm capitalize' >{basicDetails?.profileCreatedBy}</p>
                 </div>        
             </div>
+
+            
         </div>
+        {shortlist && (
+                <div className='fixed inset-0 z-20 flex items-center justify-center bg-us_blue bg-opacity-50 px-10' >
+                <div className='bg-white px-6 py-12 rounded-2xl shadow-md' >
+                    <p className='text-center text-dark_text text-md' >Are you sure you consider this person as
+                    a prospective match?</p>
+                    <div className='flex items-center justify-between mt-5' >
+                        <button className='rounded-full bg-sub_text_2 text-white px-6 py-2' onClick={toggelShortlist} >CANCEL</button>
+                        <button className='rounded-full bg-us_blue text-white px-6 py-2' onClick={handleShortlist} >YES</button>
+                    </div>
+                    
+                </div>
+            </div>
+        )}
     </main>
   )
 }

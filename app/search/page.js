@@ -189,9 +189,9 @@ const SearchPage = () => {
                                                         <SelectValue placeholder="Select" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="neverMarried" >Never Married</SelectItem>
-                                                        <SelectItem value="divorced" >Divorced</SelectItem>
-                                                        <SelectItem value="widowed" >Widowed</SelectItem>
+                                                        <SelectItem value="Never Married" >Never Married</SelectItem>
+                                                        <SelectItem value="Divorced" >Divorced</SelectItem>
+                                                        <SelectItem value="Widowed" >Widowed</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -206,17 +206,17 @@ const SearchPage = () => {
                                                 <SelectValue placeholder="Select" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="african" >African</SelectItem>
-                                                <SelectItem value="african american" >African American</SelectItem>
-                                                <SelectItem value="desi/south-asian" >Desi / South Asian</SelectItem>
-                                                <SelectItem value="arab/middle-eastren" >Arab / Middle Eastren</SelectItem>
-                                                <SelectItem value="caribbean" >Caribbean</SelectItem>
-                                                <SelectItem value="east-asian" >East Asian</SelectItem>
-                                                <SelectItem value="latino/hispanic" >Latino / Hispanic</SelectItem>
-                                                <SelectItem value="white/caucasian" >White / Caucasian</SelectItem>
-                                                <SelectItem value="mixed" >Mixed</SelectItem>
-                                                <SelectItem value="other" >Other</SelectItem>
-                                                <SelectItem value="any/dont-matter" >Any, Doesn’t Matter</SelectItem>
+                                                <SelectItem value="African" >African</SelectItem>
+                                                <SelectItem value="African American" >African American</SelectItem>
+                                                <SelectItem value="Desi / South-Asian" >Desi / South Asian</SelectItem>
+                                                <SelectItem value="Arab / Middle-Eastren" >Arab / Middle Eastren</SelectItem>
+                                                <SelectItem value="Caribbean" >Caribbean</SelectItem>
+                                                <SelectItem value="East-Asian" >East Asian</SelectItem>
+                                                <SelectItem value="Latino / Hispanic" >Latino / Hispanic</SelectItem>
+                                                <SelectItem value="White / Caucasian" >White / Caucasian</SelectItem>
+                                                <SelectItem value="Mixed" >Mixed</SelectItem>
+                                                <SelectItem value="Other" >Other</SelectItem>
+                                                <SelectItem value="Any" >Any</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         </div>

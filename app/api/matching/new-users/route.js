@@ -1,7 +1,5 @@
 import prisma from "@/prisma/client";
 
-
-
 export async function GET(req) {
   try {
     // Get the logged-in user's ID from the query or headers
@@ -9,7 +7,7 @@ export async function GET(req) {
 
     if (!userId) {
       return new Response(
-        JSON.stringify({ error: 'User ID is required' }),
+        JSON.stringify({ error: "User ID is required" }),
         { status: 400 }
       );
     }
@@ -23,13 +21,13 @@ export async function GET(req) {
         blockedUsers: true,
         matchedUsers: true,
         profileViews: true,
-        gender : true
+        gender: true,
       },
     });
 
     if (!loggedInUser) {
       return new Response(
-        JSON.stringify({ error: 'User not found' }),
+        JSON.stringify({ error: "User not found" }),
         { status: 404 }
       );
     }
@@ -41,18 +39,23 @@ export async function GET(req) {
       ...loggedInUser.matchedUsers,
     ];
 
-    // console.log("Logged in Gender", loggedInUser.gender)
+    const oppositeGender = loggedInUser.gender === "male" ? "female" : "male";
 
-    const oppositeGender = loggedInUser.gender === 'male' ? 'female' : 'male';
-    // Fetch users who have not interacted with the logged-in user
+    // Fetch new users who are not interacted with, and have verified profiles and images
     const newUsers = await prisma.user.findMany({
       where: {
         AND: [
           { id: { not: loggedInUser.id } }, // Exclude the logged-in user
-          { id: { notIn: interactedUserIds } },
-          { gender: oppositeGender }, // Exclude interacted users
+          { id: { notIn: interactedUserIds } }, // Exclude interacted users
+          { gender: oppositeGender }, // Fetch opposite gender
+          { adminVerificationStatus: true }, // Only verified profiles
         ],
-      }, 
+      },
+      include: {
+        images: {
+          where: { adminVerificationStatus: true }, // Only include verified images
+        },
+      },
     });
 
     // Return the new users
@@ -61,9 +64,9 @@ export async function GET(req) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error fetching new users:', error);
+    console.error("Error fetching new users:", error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500 }
     );
   }

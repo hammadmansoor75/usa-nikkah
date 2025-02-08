@@ -199,8 +199,8 @@ const MatchesPage = () => {
         )}
 
         {activeCategory === 'blocked' && (
-            <div className='flex items-center flex-col gap-5 justify-center mt-10' >
-                {extractedUser?.gender === 'male' ? <><Image src='/assets/blocked-female.svg' alt='matches' height={100} width={100} />
+            <div className='flex items-center flex-col gap-5 justify-center mt-20' >
+                {session?.user?.gender === 'male' ? <><Image src='/assets/blocked-female.svg' alt='matches' height={100} width={100} />
                 <p className='text-md text-center text-dark_text' >Your blocked users’ profiles will
                 appear here.</p></> : <><Image src='/assets/blocked-male.svg' className='mt-10' alt='matches' height={100} width={100} /><p className='text-md text-center text-dark_text' >Your blocked users’ profiles will
                 appear here.</p></>}
@@ -219,7 +219,7 @@ const MatchesPage = () => {
                 )}
                 {shortlistedUsers.length === 0 && (
                     <div className='flex mt-10 flex-col items-center justify-center gap-10' >
-                        {extractedUser?.gender === 'male' ? <><Image src='/assets/shortlisted-female.svg' alt='matches' height={100} width={100} />
+                        {session?.user?.gender === 'male' ? <><Image src='/assets/shortlisted-female.svg' alt='matches' height={100} width={100} />
                         <p className='text-md text-center text-dark_text' >Your Shortlisted Profiles Will Appear Here.</p></> : <><Image src='/assets/shortlisted-male.svg' className='mt-10' alt='matches' height={100} width={100} />
                         <p className='text-md text-center text-dark_text' >Your Shortlisted Profiles Will Appear Here.</p></>}
                     </div>
@@ -260,11 +260,10 @@ const MatchesPage = () => {
                 )}
                 {shortlistedBy.length === 0 && (
                     <div className='flex mt-10 flex-col items-center justify-center gap-10' >
-                        <Image src='/assets/Matches.svg' alt='matches' height={100} width={100} />
+                        <Image src='/assets/shortlisted-by.svg' alt='matches' height={100} width={100} />
                         <p className='text-md text-center text-dark_text' >You are not shortlisted by anyone</p>
 
-                        <Image src='/assets/Matches-2.svg' className='mt-10' alt='matches' height={100} width={100} />
-                        <p className='text-md text-center text-dark_text' >Shortlisted By Will Appear Here .</p>
+                        
                     </div>
                 )}
             </div>
@@ -282,11 +281,9 @@ const MatchesPage = () => {
                 )}
                 {profileViews.length === 0 && (
                     <div className='flex mt-10 flex-col items-center justify-center gap-10' >
-                        <Image src='/assets/Matches.svg' alt='matches' height={100} width={100} />
+                        <Image src='/assets/profile-view.svg' alt='matches' height={100} width={100} />
                         <p className='text-md text-center text-dark_text' >You are not viewed by anyone</p>
 
-                        <Image src='/assets/Matches-2.svg' className='mt-10' alt='matches' height={100} width={100} />
-                        <p className='text-md text-center text-dark_text' >Viewed By Will Appear Here .</p>
                     </div>
                 )}
             </div>

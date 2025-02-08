@@ -156,12 +156,12 @@ const SignupPage = () => {
 
                         <div className="mt-4" >
                             <Select onValueChange={(value) => setValue("state", value)} >
-                                <SelectTrigger className="w-[300px] h-[50px] rounded-[10px]" >
-                                    <SelectValue placeholder="Select a state" />
+                                <SelectTrigger className="w-[300px] h-[50px] rounded-[10px] text-sm" >
+                                    <SelectValue placeholder="Select a state" className="text-sm" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {US_STATES.map((state) => (
-                                        <SelectItem key={state} className="text-lgs" value={state} >{state}</SelectItem>
+                                        <SelectItem key={state} className="text-sm" value={state} >{state}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -191,27 +191,27 @@ const SignupPage = () => {
                         {errors.dob && <p className="text-red-500 text-sm mt-2" >{errors.dob.message}</p>}
 
                         <div className="mt-5" >
-                            <label className="text-sub_text_2 text-sm mb-4">Profile Created By</label>
+                            <label className="text-sub_text_2 text-sm">Profile Created By</label>
                             <Select className="" onValueChange={(value) => setValue("profileCreatedBy", value)} >
-                                <SelectTrigger className="w-[300px] h-[50px] rounded-[10px]" >
-                                    <SelectValue className="text-sub_text_2" placeholder="Select an option" />
+                                <SelectTrigger className="w-[300px] h-[50px] rounded-[10px] text-sm mt-[5px]" >
+                                    <SelectValue className="text-sub_text_2 text-sm" placeholder="Select an option" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="self">Self</SelectItem>
-                                    <SelectItem value="brother">Brother</SelectItem>
-                                    <SelectItem value="sister">Sister</SelectItem>
-                                    <SelectItem value="guardian">Guardian</SelectItem>
-                                    <SelectItem value="parent">Parent</SelectItem>
-                                    <SelectItem value="relative">Relative</SelectItem>
+                                    <SelectItem value="self" className="text-sm" >Self</SelectItem>
+                                    <SelectItem value="brother" className="text-sm">Brother</SelectItem>
+                                    <SelectItem value="sister" className="text-sm">Sister</SelectItem>
+                                    <SelectItem value="guardian" className="text-sm">Guardian</SelectItem>
+                                    <SelectItem value="parent" className="text-sm">Parent</SelectItem>
+                                    <SelectItem value="relative" className="text-sm">Relative</SelectItem>
                                 </SelectContent>
                             </Select>
                             {errors.profileCreatedBy && <p className="text-red-500 mt-2 text-sm">{errors.profileCreatedBy.message}</p>}
                         </div>
 
                         {errorMessage && <p className="text-red-500 mt-2 text-lg text-center" >{errorMessage}</p>}
-                        <div className="flex items-center justify-center" ><button type="submit" className="blue-button mt-5" >{loading ? "SIGNING YOU UP" : "SIGN UP"}</button></div>
+                        <div className="flex items-center justify-center mt-10" ><button type="submit" className="blue-button" >{loading ? "SIGNING YOU UP" : "SIGN UP"}</button></div>
 
-                        <p className="text-center mt-5 text-sm text-dark_text" >Your contact details will not be visible to other members and will remain private. </p>
+                        <p className="text-center mt-8 text-sm text-dark_text" >Your contact details will not be visible to other members and will remain private. </p>
 
                         <p className="text-center mt-5 mb-5 text-sm text-dark_text" >By signing up, you agree to our <Link href='/privacy' className="text-us_blue underline" >Privacy Policy</Link> and <Link href='/terms' className="text-us_blue underline" >Terms & Conditions.</Link></p>
  

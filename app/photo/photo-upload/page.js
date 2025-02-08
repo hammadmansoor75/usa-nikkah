@@ -321,6 +321,11 @@ const PhotoUploadPage = () => {
     setUploadedPhotos((prevPhotos) => prevPhotos.filter((_, i) => i !== index));
   };
 
+
+  const handleRemoveProfilePhoto = () => {
+    setProfilePhotoUploadUrl(null);
+  }
+
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center">
@@ -337,7 +342,7 @@ const PhotoUploadPage = () => {
   return (
     <main>
       <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
-        <Link href='/profile/partner-prefrences' className="cursor-pointer" ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
+        <Link href='/profile/partner-preferences' className="cursor-pointer" ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
         <div className='flex items-center justify-center w-full' >
           <h1 className='text-center text-xl font-semibold text-us_blue tracking-wide' >Photos</h1>
         </div>
@@ -351,9 +356,12 @@ const PhotoUploadPage = () => {
             <p className='text-sm text-sub_text_2' >Your real photos only to prevent spam and make sure you’re genuine. You can’t change profile photo after selfie verification.</p>
           </div>
           <div>
-            <div className='w-[80px] h-[80px] bg-sub_text_2 bg-opacity-50 rounded-md flex items-center justify-center' >
+            <div className='w-[100px] h-[100px] bg-sub_text_2 bg-opacity-50 rounded-md flex items-center justify-center' >
               {profilePhotoLoading ? <ClipLoader />
-              : profilePhotoUploadUrl ? <Image className='rounded-md' src={profilePhotoUploadUrl} alt='profile' height={100} width={100}  objectFit='contain' layout='intrinsic'/>  : <div className='' ><input type="file" ref={profilePhotoRef} onChange={handleProfilePhotoChange} className='hidden' /><div className='relative flex items-center justify-center' ><AccountCircleOutlinedIcon onClick={handleProfileIconClick} className='opacity-50 text-white flex items-center justify-center' sx={{ fontSize: 70 }} ></AccountCircleOutlinedIcon > <AddCircleOutlinedIcon onClick={handleProfileIconClick} className='absolute' /></div></div>  
+              : profilePhotoUploadUrl ? <div className='bg-light_gray w-[100px] h-[100px] rounded-md flex items-center justify-center overflow-hidden relative'>
+              <Image src={profilePhotoUploadUrl} alt='photo' className='rounded-md' width={100} height={100} objectFit='contain' layout='intrinsic' />
+              <button className='absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 font-bold rounded-full' onClick={() => handleRemoveProfilePhoto()}>X</button>
+            </div> : <div className='' ><input type="file" ref={profilePhotoRef} onChange={handleProfilePhotoChange} className='hidden' /><div className='relative flex items-center justify-center' ><AccountCircleOutlinedIcon onClick={handleProfileIconClick} className='opacity-50 text-white flex items-center justify-center' sx={{ fontSize: 70 }} ></AccountCircleOutlinedIcon > <AddCircleOutlinedIcon onClick={handleProfileIconClick} className='absolute' /></div></div>  
               }
             </div>
           </div>

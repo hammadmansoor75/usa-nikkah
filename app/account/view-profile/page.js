@@ -219,11 +219,11 @@ const ViewProfilePage = () => {
                     <div className='mt-5 border border-light_gray flex items-center justify-between px-5 py-3 text-us_blue text-md rounded-md w-full md:w-1/2' >
                         <NightlightRoundOutlinedIcon/>
                         <span>Religious Details</span>
-                        {relegiousDetailsChevron ? <ExpandMoreIcon onClick={toggleRelegiousDetails} /> : <ExpandLessIcon onClick={toggleRelegiousDetails} />}
+                        {personalDetailsChevron ? <ExpandMoreIcon onClick={togglePersonalDetails} /> : <ExpandLessIcon onClick={togglePersonalDetails} />}
                     </div>
                 </div>
 
-                {relegiousDetailsChevron && (
+                {personalDetailsChevron && (
                     <div className='mt-5' >
                         <div className='grid grid-cols-2 gap-4' >
                             <p className='text-sm text-sub_text_2' >Religiosity</p>
@@ -262,11 +262,11 @@ const ViewProfilePage = () => {
                     <div className='mt-5 border border-light_gray flex items-center justify-between px-5 py-3 text-us_blue text-md rounded-md w-full md:w-1/2' >
                         <SearchOutlinedIcon/>
                         <span>Partner Preferences</span>
-                        {partnerPrefrencesChevron ? <ExpandMoreIcon onClick={togglePartnerPrefrences} /> : <ExpandLessIcon onClick={togglePartnerPrefrences} />}
+                        {personalDetailsChevron ? <ExpandMoreIcon onClick={togglePersonalDetails} /> : <ExpandLessIcon onClick={togglePersonalDetails} />}
                     </div>
                 </div>
 
-                {partnerPrefrencesChevron && (
+                {personalDetailsChevron && (
                     <div className='mt-5' >
                         <div className='grid grid-cols-2 gap-4' >
                             <p className='text-sm text-sub_text_2' >Age Group From</p>

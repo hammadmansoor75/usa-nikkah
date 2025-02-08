@@ -111,7 +111,7 @@ const RelegiousDetailsPage = () => {
         : await axios.post(apiEndpoint, payload);
 
       if (response.status === 200) {
-        router.push("/profile/partner-prefrences");
+        router.push("/profile/partner-preferences");
       } else {
         alert("Something went wrong! Please try again.");
         console.log(response.error);
@@ -141,7 +141,7 @@ const RelegiousDetailsPage = () => {
         <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
             <Link href='/profile/personal-details' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
-                <h1 className='text-center text-xl font-semibold text-us_blue' >Relegious Details</h1>
+                <h1 className='text-center text-xl font-semibold text-us_blue' >Religious Details</h1>
             </div>
         </div>
 

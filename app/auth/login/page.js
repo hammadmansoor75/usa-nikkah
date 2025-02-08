@@ -44,8 +44,9 @@ const LoginPage = () => {
           
           <div className='flex items-center justify-center mt-10' >
 
-            <form onSubmit={handleSubmit} className='px-5 md:px-20 flex flex-col items-center' >
+            <form onSubmit={handleSubmit} className='px-5 md:px-20 flex flex-col' >
               
+              <div className='flex flex-col items-center justify-center' >
               <div className="input flex items-center justify-center gap-2 mt-10" >
               <MailLockIcon className="text-sub_text_2"  />
                 <p className='text-xl text-sub_text_2' >|</p>
@@ -56,6 +57,11 @@ const LoginPage = () => {
                 <LockOpenIcon className="text-sub_text_2" />
                 <p className='text-xl text-sub_text_2' >|</p>
                 <input type='password' placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full text-sm placeholder:text-sm placeholder:text-sub_text_2 mt-1" />                         
+              </div>
+              </div>
+
+              <div className='mt-7 flex items-center justify-end' >
+                <Link href='/auth/forgot-password' className="text-us_blue text-md font-medium cursor-pointer" >Forgot Password?</Link>
               </div>
 
               <p className='text-sm text-center text-sub_text_2 mt-10' >By logging in, you agree with our 

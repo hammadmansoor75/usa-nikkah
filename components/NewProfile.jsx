@@ -13,6 +13,7 @@ import { useSession } from 'next-auth/react';
 import { useAlert } from '@/context/AlertContext';
 
 
+
 const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
     const [profilePhoto, setProfilePhoto] = useState();
     const { data: session, status } = useSession();
@@ -29,6 +30,8 @@ const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
     const [thumbsDownOpen, setThumbsDownOpen] = useState(false);
 
     const router = useRouter();
+
+    const [shortlistOpen, setShortlistOpen] = useState(false);
     
     
         
@@ -87,10 +90,31 @@ const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
 
     const toggleThumbsUpOpen = () => setThumbsUpOpen(!thumbsUpOpen);
     const toggleThumbsDownOpen = () => setThumbsDownOpen(!thumbsDownOpen);
+    const toggleShortlistOpen = () => setShortlistOpen(!shortlistOpen);
 
     const handleProfileView = () => {
         router.push(`/profile-view-user/${profile.id}`)
     }
+
+
+    const handleShortlist = async () => {
+        try {
+            const response = await axios.post('/api/matching/shortlisted', {
+                loggedInUserId : session.user.id,
+                targetUserId : profile.id
+            })
+            if(response.status === 200){
+                removeFromNewUsers(profile.id)
+                toggleShortlistOpen();
+            }else{
+
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
 
     // Function to generate a random number between 40 and 90
   
@@ -110,10 +134,11 @@ const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
                         <p className='text-xs text-dark_text capitalize' >{profile.city} , {profile.state}</p>
                     </div>
                     <div className='flex items-center justify-center gap-4 mt-4' >
-                        <button onClick={toggleThumbsUpOpen} className='bg-us_blue flex items-center justify-between gap-2 text-white px-4 py-2 text-sm rounded-lg cursor-pointer' ><ThumbUpAltRoundedIcon /></button>
-                        <button onClick={toggleThumbsDownOpen} className='bg-us_blue px-4 py-2 rounded-lg flex items-center cursor-pointer justify-center' >
+                        <button onClick={toggleThumbsUpOpen} className='bg-us_blue flex items-center justify-between gap-2 text-white px-2 py-1 text-sm rounded-lg cursor-pointer' ><ThumbUpAltRoundedIcon /></button>
+                        <button onClick={toggleThumbsDownOpen} className='bg-us_blue px-2 py-1 rounded-lg flex items-center cursor-pointer justify-center' >
                             <ThumbDownRoundedIcon className='text-white' />
                         </button>
+                        <button className='bg-us_blue px-2 py-1 rounded-lg flex items-center cursor-pointer justify-center' onClick={toggleShortlistOpen} ><StarOutlinedIcon className='text-yellow-500' /></button>
                     </div>
             </div>
             <div className='' >
@@ -143,6 +168,20 @@ const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
                     <div className='flex items-center justify-between mt-5' >
                         <button className='rounded-full bg-sub_text_2 text-white px-6 py-2' onClick={toggleThumbsDownOpen} >CANCEL</button>
                         <button className='rounded-full bg-us_blue text-white px-6 py-2' onClick={handleThumbsDown} >YES</button>
+                    </div>
+                    
+                </div>
+            </div>
+        )}
+
+
+    {shortlistOpen && (
+                <div className='fixed inset-0 flex items-center justify-center bg-us_blue bg-opacity-50 px-10' >
+                <div className='bg-white px-6 py-12 rounded-2xl shadow-md' >
+                    <p className='text-center text-dark_text text-md' >Are you sure you want to shortlist this profile?</p>
+                    <div className='flex items-center justify-between mt-5' >
+                        <button className='rounded-full bg-sub_text_2 text-white px-6 py-2' onClick={toggleShortlistOpen} >CANCEL</button>
+                        <button className='rounded-full bg-us_blue text-white px-6 py-2' onClick={handleShortlist} >YES</button>
                     </div>
                     
                 </div>

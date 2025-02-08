@@ -226,7 +226,7 @@ const PartnerPrefrencesPage = () => {
   return (
     <section className="mb-10" >
         <div className='bg-white shadow-lg flex items-center justify-start px-7 md:px-10 py-3 w-full' >
-            <Link href='/profile/relegious-details' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
+            <Link href='/profile/religious-details' ><Image src='/assets/back-icon.svg' alt='backIcon' height={30} width={30} /></Link>
             <div className='w-full' >
                 <h1 className='text-center text-xl font-semibold text-us_blue' >Partner Preferences</h1>
             </div>
@@ -418,7 +418,7 @@ const PartnerPrefrencesPage = () => {
 
                     <div className="mt-3" >
                         <label className="text-sub_text_2 text-sm mb-3">
-                            {gender === 'male' ? 'Work: Your husband wants you to be...' :'Work: Are you looking for...'}
+                            {gender === 'male' ? 'Work: Are you looking for...' :'Work: Your husband wants you to be...'}
                         </label>
                         <div className='mt-2' >
                         <Select onValueChange={(value) => setValue("work", value)} value={watch("work")}  >
