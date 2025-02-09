@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
  try {
-    const { email, password, name, state, city, dob, gender, profileCreatedBy } = await req.json();
+    const { email, password, name,phoneNumber, state, city, dob, gender, profileCreatedBy } = await req.json();
 
 
     // Check if the email already exists
@@ -15,6 +15,15 @@ export async function POST(req) {
     if (existingUser) {
       return NextResponse.json({ error: "Email already exists" }, { status: 400 });
     }
+
+    const existingPhoneCheck = await prisma.user.findUnique({
+      where : {phoneNumber}
+    })
+
+    if (existingPhoneCheck) {
+      return NextResponse.json({ error: "Phone Number Already Exists" }, { status: 400 });
+    }
+
 
     const calculatedAge = calculateAge(dob);
     const age = calculatedAge.toString();
@@ -27,6 +36,7 @@ export async function POST(req) {
         name,
         email,
         password : hashedPassword,
+        phoneNumber,
         city,
         state,
         gender,

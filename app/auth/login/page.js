@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { signIn } from "next-auth/react";
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import MailLockIcon from '@mui/icons-material/MailLock';
+import axios from 'axios';
 
 
 const LoginPage = () => {
@@ -28,9 +29,27 @@ const LoginPage = () => {
     if(res?.error){
       setErrorMessage(res.error);
     }else{
-      router.push("/homepage")
+      const getUserResponse = await axios.post("/api/get-user-by-email", {email});
+      if(getUserResponse.status === 200){
+        const user = getUserResponse.data;
+        if(!user.personalDetails){
+          router.push("/profile/personal-details");
+          console.log("No PERSONAL DETAILS FOUND");
+        }else if(!user.relegiousDetails){
+          router.push("/profile/religious-details");
+          console.log("No RELEGIOUS DETAILS FOUND");
+        }else if(!user.partnerPrefrences){
+          router.push("/profile/partner-preferences");
+          console.log("No PARTNER PREFRENCES FOUND");
+        }else if(!user.images){
+          router.push("/photo/photo-upload");
+        }else{
+          router.push("/homepage")
+        }
+      
     }
   }
+}
 
   return (
     <main>
@@ -61,7 +80,7 @@ const LoginPage = () => {
               </div>
 
               <div className='mt-7 flex items-center justify-end' >
-                <Link href='/auth/forgot-password' className="text-us_blue text-md font-medium cursor-pointer" >Forgot Password?</Link>
+                <Link href='/auth/forgot-password' className="text-us_blue text-[14px] font-medium cursor-pointer" >Forgot Password?</Link>
               </div>
 
               <p className='text-sm text-center text-sub_text_2 mt-10' >By logging in, you agree with our 
@@ -79,4 +98,4 @@ const LoginPage = () => {
   )
 }
 
-export default LoginPage
+export default LoginPage;

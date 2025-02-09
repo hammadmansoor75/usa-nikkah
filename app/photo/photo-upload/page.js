@@ -107,7 +107,7 @@ const PhotoUploadPage = () => {
         throw new Error("Failed to upload");
       };
       const data = await response.json();
-      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,ar_1:1,q_auto,f_auto/");
+      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,ar_1:1,w_400,h_400,c_fill,q_auto:best,f_auto,dpr_2.0,e_enhance/");
       setProfilePhotoUploadUrl(faceCroppedURL);
       setProfilePhotoUploadStatus(true);
       console.log(profilePhotoUploadUrl)
@@ -159,7 +159,7 @@ const PhotoUploadPage = () => {
           .then((data) => {
             const faceCroppedURL = data.secure_url.replace(
               "/upload/",
-              "/upload/c_crop,g_face,ar_1:1,q_auto,f_auto/"
+              "/upload/c_crop,g_face,ar_1:1,w_400,h_400,c_fill,q_auto:best,f_auto,dpr_2.0,e_enhance/"
             );
             return faceCroppedURL;
           });
@@ -241,7 +241,7 @@ const PhotoUploadPage = () => {
         throw new Error("Failed to upload selfie");
       }
       const data = await response.json();
-      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,ar_1:1,q_auto,f_auto/");
+      const faceCroppedURL = data.secure_url.replace("/upload/", "/upload/c_crop,g_face,ar_1:1,w_400,h_400,c_fill,q_auto:best,f_auto,dpr_2.0,e_enhance/");
       setSelfieUploadUrl(faceCroppedURL);
       setSelfieCaptureStatus(true);
       showAlert("Selfie uploaded successfully!");

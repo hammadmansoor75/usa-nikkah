@@ -73,10 +73,11 @@ const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
                 removeFromNewUsers(profile.id)
                 toggleThumbsUpOpen();
                 getMatchedUsers(session.user.id);
-                showAlert("Congratulations! It's a Match")
+                showAlert("Congratulations! It's a Match. Your matches will refresh when you leave this page.")
             }else if(response.status === 200){
                 removeFromNewUsers(profile.id)
                 toggleThumbsUpOpen();
+                showAlert("Profile has been moved to It's A Match tab for you to start communicating!")
             }
         } catch (error) {
             console.log(error);
@@ -86,6 +87,7 @@ const NewProfile = ({profile, removeFromNewUsers, getMatchedUsers}) => {
     const handleThumbsDown = async () => {
         removeFromNewUsers(profile.id)
         toggleThumbsDownOpen();
+        showAlert("Profile has been moved to Reconsider Tab for you to take another look")
     }
 
     const toggleThumbsUpOpen = () => setThumbsUpOpen(!thumbsUpOpen);

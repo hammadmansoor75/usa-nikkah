@@ -285,7 +285,7 @@ const ViewProfilePage = () => {
                             <p className='text-dark_text text-sm capitalize' >{partnerPrefrences?.maritalStatus}</p>
                         </div>
                         <div className='grid grid-cols-2 gap-4 mt-2' >
-                            <p className='text-sm text-sub_text_2' >Relegious Preference</p>
+                            <p className='text-sm text-sub_text_2' >Religious Preference</p>
                             <p className='text-dark_text text-sm capitalize' >{partnerPrefrences?.religiousPreference}</p>
                         </div>
                         <div className='grid grid-cols-2 gap-4 mt-2' >

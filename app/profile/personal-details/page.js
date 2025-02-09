@@ -60,7 +60,7 @@ const personalDetailsScehma = z.object({
     }),
     height : z.string().nonempty({ message: "Height is required" }),
     maritalStatus : z.string().nonempty({ message: "Marital Status is required" }),
-    children : z.string().nonempty({ message: "No of Children is required" }),
+    children : z.string().nonempty({ message: "No of Children is required" }).default("None"),
     childrenLiving : z.string().optional(),
     moreKids : z.string().optional(),
     ethnicBackground : z.string().nonempty({ message: "Ethnic Background is required" }),
@@ -106,7 +106,7 @@ const PersonalDetailsPage = () => {
                 setValue("aboutMe", data.aboutMe || "");
                 setValue("height", data.height || "");
                 setValue("maritalStatus", data.maritalStatus || "");
-                setValue("children", data.children || "");
+                setValue("children", data.children || "None");
                 setValue("childrenLiving", data.childrenLiving || "");
                 setValue("moreKids", data.moreKids || "");
                 setValue("ethnicBackground", data.ethnicBackground || "");
@@ -119,6 +119,7 @@ const PersonalDetailsPage = () => {
         }
 
         if(status === 'authenticated' && session){
+            setValue("children" , "None")
             getPersonalDetails(session.user.id);
         }
         

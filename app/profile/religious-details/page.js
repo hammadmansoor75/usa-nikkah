@@ -24,7 +24,7 @@ const generateRelegiousSchema = (gender) => {
         religiosity : z.string().nonempty({message : "This field is required"}),
         prayer : z.string().nonempty({message : "This field is required"}),
         revert: z.enum(["yes", "no"], { message: "This field is required" }),
-        revertDuration : z.string().optional().default(""),
+        revertDuration : z.string().optional(),
         mosqueVisit : z.string().nonempty({message : "This field is required"}),
     })
     
@@ -51,6 +51,8 @@ const RelegiousDetailsPage = () => {
 
   const gender = session?.user?.gender || "";
   const schema = generateRelegiousSchema(gender);
+
+  const [revertValue, setRevertValue] = useState("");
 
   const {showAlert} = useAlert();
 
@@ -82,6 +84,7 @@ const RelegiousDetailsPage = () => {
             setValue("revert", data.revert || "");
             setValue("revertDuration", data.revertDuration || "");
             setValue("mosqueVisit", data.mosqueVisit || "");
+            setRevertValue(data.revert || "");
 
             if (gender === "male") {
               setValue("smoke", data.smoke || "");
@@ -191,7 +194,10 @@ const RelegiousDetailsPage = () => {
                     <div className="mt-5 flex items-center justify-start gap-7" >
                         <label className="text-sub_text_2 text-sm" >Are you a Revert?</label>
                         <RadioGroup
-                            onValueChange={(value) => setValue("revert", value)}
+                            onValueChange={(value) => {
+                              setValue("revert", value)
+                              setRevertValue(value)
+                            } }
                             value={watch("revert")}
                             className="flex items-center justify-center gap-2"
                         >
@@ -205,7 +211,9 @@ const RelegiousDetailsPage = () => {
                     </div>
                     {errors.revert && <p className="text-red-500 mt-2 text-sm">{errors.revert.message}</p>}
 
-                    <div className='mt-5 flex items-baseline justify-start gap-5' >
+                    {revertValue === 'yes' && (
+                      <div>
+                        <div className='mt-5 flex items-baseline justify-start gap-5' >
                         <label className="text-sub_text_2 text-sm">If yes, how long?</label>
                         <div className="religious-input flex items-center justify-center gap-2 mt-1" >
                             
@@ -213,6 +221,8 @@ const RelegiousDetailsPage = () => {
                         </div>
                     </div>
                     {errors.revertDuration && <p className="text-red-500 text-sm mt-2" >{errors.revertDuration.message}</p>}
+                      </div>
+                    )}
 
                     <div className="mt-5" >
                         <label className="text-sub_text_2 text-sm mb-3">How often do you visit the masjid?</label>
