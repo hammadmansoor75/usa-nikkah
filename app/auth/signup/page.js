@@ -13,8 +13,6 @@ import { SelectValue } from "@radix-ui/react-select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import MailLockIcon from '@mui/icons-material/MailLock';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
-import { supabase } from "@/utils/supabaseClient";
-import OtpVerification from "@/components/OtpVerification";
 import { useSignupContext } from "@/providers/AccountProvider";
 import axios from "axios";
 import { redirect, useRouter } from "next/navigation";
